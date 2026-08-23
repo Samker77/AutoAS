@@ -1,590 +1,205 @@
-<p align="center">
-  <img src="assets/hero.svg" alt="Arbor — Optimize anything" width="100%">
-</p>
+<h1 align="center">🌳 Arbor V2</h1>
 
-
-<h1 align="center">🌳 Arbor</h1>
-
-<h3 align="center">The autonomous research agent that beats Claude Code and Codex by <b>2.5×</b> on the same compute budget</h3>
+<h3 align="center">自主科研智能体 · 任务规划 → 实验运行 → 数据分析 → 反馈迭代 的完整闭环</h3>
 
 <p align="center">
-  <a href="https://arxiv.org/pdf/2606.11926"><img src="https://img.shields.io/badge/Paper-arXiv-B31B1B?style=for-the-badge&logo=arxiv&logoColor=white" alt="Paper"></a>
-  <a href="https://github.com/RUC-NLPIR/Arbor"><img src="https://img.shields.io/badge/Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-  <a href="https://RUC-NLPIR.github.io/Arbor/"><img src="https://img.shields.io/badge/Project_Page-Live-0E9B9B?style=for-the-badge&logo=githubpages&logoColor=white" alt="Project Page"></a>
-  <a href="https://RUC-NLPIR.github.io/Arbor/demo.html"><img src="https://img.shields.io/badge/Live_Demo-Watch-FF5C8A?style=for-the-badge&logo=githubpages&logoColor=white" alt="Live Demo"></a>
-  <a href="https://RUC-NLPIR.github.io/Arbor/docs/"><img src="https://img.shields.io/badge/Docs-Material-526CFE?style=for-the-badge&logo=materialformkdocs&logoColor=white" alt="Docs"></a>
-  <a href="https://github.com/RUC-NLPIR/Arbor/discussions"><img src="https://img.shields.io/badge/Discussions-Join-5865F2?style=for-the-badge&logo=github&logoColor=white" alt="Discussions"></a>
+  <a href="https://github.com/Samker77/Arbor-Scientist"><img src="https://img.shields.io/badge/Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-D22128?style=for-the-badge&logo=apache&logoColor=white" alt="License: Apache 2.0"></a>
+  <a href="https://arxiv.org/abs/2606.11926"><img src="https://img.shields.io/badge/Base_Paper-arXiv-B31B1B?style=for-the-badge&logo=arxiv&logoColor=white" alt="Base paper"></a>
+  <a href="https://dashscope.aliyun.com/"><img src="https://img.shields.io/badge/Base_Model-Qwen%40百炼-7A3EFF?style=for-the-badge&logo=alibabacloud&logoColor=white" alt="Qwen via 百炼"></a>
 </p>
 
 <p align="center">
-  <b>English</b> | <a href="README.zh-CN.md">简体中文</a>
+  <i>把「一个科研目标 + 一个可量化指标」交给 Arbor V2，它会自主完成
+  <b>任务规划与实验设计 → 实验运行与数据获取 → 数据分析与反馈迭代</b> 的三段式闭环，
+  用实验结果改变下一轮的计划，逐步提升实验成效。</i>
 </p>
-
-<p align="center">
-  <i>Give Arbor a benchmark and a goal. It proposes hypotheses, edits code, runs real
-  experiments, and keeps only the gains that survive held-out data — growing a
-  <b>hypothesis tree</b> instead of forgetting what failed.</i>
-</p>
-
-> **▶️ Try it in 30 seconds — no API key, no config:**
->
-> ```bash
-> pip install arbor-agent && arbor replay --demo   # watch the hypothesis tree grow live
-> ```
->
-> Or **watch it right now in your browser** — nothing to install: **[▶️ Live Demo](https://RUC-NLPIR.github.io/Arbor/demo.html)**.
-
-### 🏆 One controller, six tasks — wins the held-out test on all of them
-
-| Task | Metric | Claude Code | Codex | **Arbor** |
-| --- | --- | :---: | :---: | :---: |
-| BrowseComp | acc ↑ | 53.33 | 50.00 | **67.67** |
-| Terminal-Bench 2.0 | pass ↑ | 71.70 | 73.59 | **77.36** |
-| Math-Reasoning Data | gap ↑ | 8.33 | 6.25 | **20.83** |
-
-Plus **86.36% Any-Medal on MLE-Bench Lite** (GPT-5.5). → [See all six tasks](#-results) · [project page](https://RUC-NLPIR.github.io/Arbor/) · [paper](https://arxiv.org/pdf/2606.11926) · [docs](https://RUC-NLPIR.github.io/Arbor/docs/)
-
-## 🎬 Demo
-
-
-https://github.com/user-attachments/assets/49c1a306-d2e9-49d6-9c83-65e38a62df30
-
-## 📣 News
-
-- **2026-06-30** — **Arbor learns from its own runs.** Each run leaves concrete, reusable findings — a dataset quirk that helped, a trap to avoid; the next similar task recalls them at intake, so the agent starts from experience instead of scratch. 🧠
-- **2026-06-22** — **Built-in literature search & idea novelty checks.** Arbor can now ground its research in prior work via the public [alphaXiv](https://www.alphaxiv.org) API — zero config, no search endpoint or key. Novelty-check any idea before you build it with `arbor idea-check "<your idea>"`, or let the Coordinator vet every new branch automatically. See [Literature Search & Novelty Checks](#-literature-search--novelty-checks). 🔎
-- **2026-06-18** — Arbor was featured by [VentureBeat](https://venturebeat.com/), one of the leading tech media outlets in the US: ["New AI optimization framework beats Claude Code and Codex by 2.5x on the same compute budget"](https://venturebeat.com/orchestration/new-ai-optimization-framework-beats-claude-code-and-codex-by-2-5x-on-the-same-compute-budget). 📰
-- **2026-06-12** — Arbor's native CLI runtime and Agent Skill Suite (Codex / Claude Code) are released. 🚀
-- **2026-06-11** — The Arbor paper is released on [arXiv](https://arxiv.org/abs/2606.11926). 🎉
-
-## 💡 Why Arbor
-
-* **General-purpose optimization** — optimizes any task with a target to improve
-  and a metric to measure, from model training to harness engineering to data synthesis.
-* **Long-horizon structured exploration** — the hypothesis-tree framework keeps
-  results, failure modes, and distilled insights in the Idea Tree and propagates them
-  upward, so later ideas start smarter instead of scrolling off.
-* **Real experiment discipline** — Executors iterate on a dev split, validate on a
-  held-out test split, and only merge gains that clear a configurable margin — each in
-  its own git worktree, so `main` is never touched until you merge.
-* **Literature-grounded ideas** — keyless search backends (alphaXiv + web) check an
-  idea's novelty and prior art *before* spending compute, via node verdicts or
-  `arbor idea-check`.
-* **Model and workflow flexibility** — Anthropic, OpenAI / Responses API, and
-  OpenAI-compatible backends via LiteLLM (DeepSeek, Gemini, Qwen, vLLM, Ollama, …),
-  usable as a native CLI or an Agent Skill Suite inside Codex / Claude Code.
-* **Steerable** — a live dashboard, read-only WebUI, optional human-in-the-loop
-  review, and one-line domain plugins let you steer runs without touching the core.
-
-
-## 🧩 Framework
-
-<p align="center">
-  <img src="assets/framework.png" alt="Arbor framework" width="100%">
-</p>
-
-Arbor runs **two cooperating agents**:
-
-- **Coordinator** — the research director. It maintains the Idea Tree, drives the
-  search via the *arbor cycle*, and dispatches experiments.
-- **Executor** — the research engineer. Given one idea, it faithfully implements the
-  code changes, runs the experiment in an isolated git worktree, and reports evidence.
-
-Together they repeat a six-step **arbor cycle**:
-
-1. **Observe** — the Coordinator re-grounds itself in the Idea Tree, reading the
-   active frontier, constraints, ancestor insights, recent evidence, and current
-   best artifact.
-2. **Ideate** — it chooses a parent node and proposes child hypotheses that refine,
-   correct, or extend what the tree has already learned.
-3. **Select** — it chooses the most promising pending leaves to test, balancing
-   the current best direction with unresolved alternatives.
-4. **Dispatch** — selected hypotheses are sent to independent Executors, which
-   implement them in fresh worktrees and evaluate them on the dev signal.
-5. **Backpropagate** — Arbor records each result, score, insight, and branch, then
-   abstracts the lesson upward so ancestor nodes and future ideas inherit it.
-6. **Decide** — the Coordinator chooses whether to merge, prune, continue, leave a
-   node pending, or stop, using held-out validation for merge decisions.
-
-
-## 🚀 CLI And Skill Versions
-
-This repository includes three ways to use Arbor:
-
-| Version | Location | Best for | Needs an API key? |
-| --- | --- | --- | --- |
-| Native CLI runtime | Python package and `arbor` command | Real Arbor research runs, long experiments, dashboard, checkpoints, executor tools, merge/test discipline, plugins, reports | **Yes** — configure a provider/model in `arbor setup`. |
-| Keyless harness integration | `arbor install` + `arbor mcp` (or the Claude Code plugin) | Running Arbor **inside Claude Code / Codex using that harness's own model** — e.g. a Claude subscription plan, where there is no API key to give Arbor | **No** — the host agent's model does the reasoning; Arbor only supplies deterministic tools. |
-| Agent Skill Suite (standalone) | [`skills/`](skills/README.md) | The same harness flow without even installing the package — pure instructions + a stdlib fallback helper | **No** |
-
-If you can run the CLI and have an API key, the native runtime gives the most
-complete Arbor behavior: intake, Research Contract, live dashboard, EventBus,
-checkpoint/resume, executor dispatch, protected dev/test evaluation discipline,
-SearchAgent, plugins, and final report generation. If you only have a coding
-agent with a subscription model (no raw API key), use the **keyless harness
-integration** below — see [Use inside Claude Code or any harness](#-use-inside-claude-code-or-any-harness-no-api-key).
-
-The repo-root [`skills/`](skills/README.md) directory is a Codex/Claude Code
-skill suite. After installation, invoke `$arbor-research-agent` in Codex or
-`/arbor-research-agent` in Claude Code and describe your research objective as
-you would in Arbor. The skill suite performs Arbor-style clarification first
-when target, metric, data, permissions, budget, or run mode are unclear, then
-loads the orchestrator and phase skills. This is separate from the internal
-runtime skills stored under `src/skills/`.
 
 ---
 
-## 📦 Install
+## 🏆 核心成果：V2 相对 V1 在同一任务上的提升
 
-**Requirements:** Python ≥ 3.10 and Git. A virtual environment is recommended.
+> 任务：**APTOS 2019 糖尿病视网膜病变分级**（5 类严重度 0–4）
+> 指标：quadratic weighted kappa（保留测试集）｜基座模型：**Qwen（qwen3.8-max，阿里云百炼）**
+> 完整实验记录见 [`result/V2_APTOS_RESULTS.md`](result/V2_APTOS_RESULTS.md)
 
-```bash
-pip install arbor-agent   # or: uv pip install arbor-agent
-arbor doctor              # verify PATH, git, API keys
-```
+| 维度 | V1 (Arbor-main) | **V2** | 差异 |
+|---|---|---|---|
+| **测试集 kappa** | 0.89643 | **0.92264** | **+0.0262（跨过 SILVER 档线 0.9197）** |
+| 档位 | 未达银牌 | **SILVER** | 跨档 |
+| **运行时长** | 8h16m41s | **4h08m49s** | **V2 快约 50%** |
+| **LLM 错误** | 10 | **0** | **完全消除** |
+| 未缓存 token | 1.25M | **815K** | **−35%** |
+| 想法数 | 22 | 28 | 探索更深 |
+| 合并（merged） | 3 | 4 | 更高效的收敛 |
 
-> Prefer a global command? `pipx install arbor-agent` makes `arbor` available everywhere.
-
-<details>
-<summary>Install from source (for development)</summary>
-
-```bash
-git clone https://github.com/RUC-NLPIR/Arbor.git
-cd Arbor
-python -m venv .venv && source .venv/bin/activate   # recommended
-pip install -e .                                    # or: uv pip install -e .
-arbor doctor
-```
-
-For the docs site, `pip install -e ".[docs]" && mkdocs serve`, or read them online
-via the **Docs** badge above.
-
-</details>
+**一句话结论**：V2 用 **一半的时间、零 LLM 错误、更深的假设树**，把测试集 kappa 从 0.89643 提升到 **0.92264（SILVER，接近 gold 档 0.9305）**——同样的基座模型、同样的计算预算，成绩跨了一个档位。
 
 ---
 
-## 🔑 Use Inside Claude Code or Any Harness (No API Key)
+## 🔁 三段式闭环：实验结果如何改变下一轮计划
 
-On a Claude **subscription plan** there is no API key to hand to a separate tool.
-Arbor's keyless integration solves this: **Arbor never calls an LLM** — your
-coding agent's own model drives the research loop, while Arbor contributes its
-durable Idea Tree, evaluation, git-worktree isolation, guarded merges, and
-reports as deterministic tools.
+Arbor V2 的核心不是"一次生成方案"，而是把整个科研流程做成一个**可自动运行、可量化验证的闭环**：
 
-**1. Install the skill suite** (no more manual directory copying):
-
-```bash
-pip install arbor-agent
-arbor install            # auto-detects the harness; also --claude / --codex / --project / --target <dir>
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ① 任务规划与实验设计                                                       │
+│     协调器（Coordinator）解析目标，在「想法树」上生成并筛选假设，               │
+│     规划下一轮要实验的任务清单                                                 │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │ 派发
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ② 实验运行与数据获取                                                       │
+│     执行器（Executor）在隔离的 git worktree 中实现代码、运行真实实验，          │
+│     在 dev 集迭代、在保留测试集（B_test）验证，产出分数与提交物                  │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │ 返回分数 / 失败 / 洞察
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ③ 数据分析与反馈迭代                                                       │
+│     收敛检测器（ConvergenceDetector）判定分数平台期；反向传播把失败教训            │
+│     和成功路径写回想法树；协调器据此决定：继续 / 合并 / 剪枝 / 换方向 / 停止      │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │ 带着「下一轮该改什么」回到 ①
+                                  └───────────────↺
 ```
 
-**2. Register the keyless tool server** (optional but recommended — backs the
-skills with Arbor's *real* tree/eval/merge/report implementations):
+**示例：实验结果确实改变了下一轮计划**（APTOS 任务中 4 个 merged 想法的真实轨迹）：
 
-```bash
-pip install "arbor-agent[mcp]"          # the MCP server is an optional extra
-claude mcp add arbor -- arbor mcp        # Claude Code; any MCP-capable harness works
-```
+| 轮次 | 想法（节点） | Dev κ | 做了什么 |
+|---|---|---|---|
+| R1 | 1.1.1.1 | 0.9083 | EfficientNet-B3@384 + circle-crop 建立 baseline 管线 |
+| R2 | 2.1.1.1 | 0.9098 | 上一轮 B3 达标 → 加 5-fold CV + OOF 阈值拟合 |
+| R3 | 3.2.1.1 | 0.9279 | 上一轮 CV 有效 → 引入 ConvNeXt-Base 做 2-way blend |
+| R4 | 3.3.1.1 | 0.9274 | 上一轮 blend 有效 → 加 Swin-Base 做 3-way blend，OOF 0.9324 |
 
-**Or do both in one step with the Claude Code plugin:**
-
-```bash
-claude plugin marketplace add RUC-NLPIR/Arbor
-claude plugin install arbor              # installs the skills + registers `arbor mcp`
-```
-
-**3. Run it** from inside your project, in the coding agent:
-
-```text
-/arbor-research-agent optimize this repo for <metric>. Ask before training, package installs, or B_test.
-```
-
-**4. Watch progress in the browser** (read-only, also keyless). Either ask the
-agent to call the `open_dashboard` tool, or run it yourself:
-
-```bash
-arbor web <run-name>                      # serves http://127.0.0.1:8765 for the session
-```
-
-To remove the skills later: `arbor uninstall` (it only touches Arbor's own
-`arbor-*` directories). See [`skills/README.md`](skills/README.md) for the full
-skill-suite reference and the manual install steps.
+**负向发现同样被保留并写入 ROOT insight 复用**（`B5@456 反而不如 B3@384`、`8-view TTA 没有超过 4-view`、`single-fold 阈值搜索会过拟合`、`Nelder-Mead 抛光提升 OOF 但 hurt B_test`）——实验得出的"此路不通"也成为下一轮规划的依据，避免重复踩坑。
 
 ---
 
-## ⚡ Getting Started
+## ⚙️ V2 的关键技术改进（本仓库源码内）
 
-**See it work first — no API key, no config:**
+### 1. 收敛引擎 v2：score-gated idle clock（`src/core/agent.py`）
 
-```bash
-arbor replay --demo   # watch a recorded run: the hypothesis tree grows live
+- **问题**：V1 中执行器在提交了可工作的代码后，会继续在旁支 A/B 实验上空转，既不收敛也不产生价值。
+- **V2 方案**：只有当一次提交**伴随评测分数提升**（`_EVAL_SCORE_RE` 从 `bash eval.sh` 输出中抽取 `score:/accuracy:`）时，才重置空闲时钟；否则空闲累计，触发收敛提示。协调器自身永不提前收敛。
+- **效果**：在 APTOS 任务上 **LLM 错误从 10 → 0，运行时长减半**（8h16m → 4h08m），探索更深（28 vs 22 想法，4 vs 3 merged）。
+
+### 2. A4 增量 token 缓存（`src/core/context.py`）
+
+- 每条消息的 token 预估（`_est_tokens`）按内容引用缓存，只有内容真正变化才重算——在长上下文、多轮迭代的科研场景下显著降低重复计费与延迟。
+- **效果**：未缓存 token **−35%**（1.25M → 815K），输入 token −3.5M。
+
+> 注：本仓库为当前上传的 V2 快照（含收敛引擎 v2 与 A4 缓存）。L1/L2/i18n 等后续优化位于开发分支，随迭代合入。
+
+---
+
+## 🧩 框架原理
+
+Arbor 由两个协同的智能体组成，重复执行六步 **arbor cycle**：
+
+- **协调器（Coordinator）** — 研究总监：维护想法树、驱动循环、派发实验、依据证据决策。
+- **执行器（Executor）** — 研究工程师：实现一个想法、在隔离 worktree 跑实验、汇报证据。
+
+```
+① OBSERVE  观察当前结果与失败模式
+② IDEATE   基于分析和树内洞察提出 1–3 个新假设
+③ SELECT   平衡「当前最优方向」与「未探索备选」，选出最值得测的
+④ DISPATCH 派发独立执行器在隔离 worktree 中实现并评估（dev 集）
+⑤ BACKPROP 记录分数、洞察、失败；把教训向上抽象给祖先与未来想法
+⑥ DECIDE   依据保留测试集验证决定：继续 / 合并到 trunk / 剪枝 / 停止
 ```
 
-> Want a shareable version? `arbor replay --demo --html` writes a self-contained
-> interactive page (no server, no deps) you can open in a browser or attach anywhere.
+**想法树（Idea Tree）** 是记忆的核心：每一轮的结果、失败模式、提炼的洞察都保存在树中并向根节点传播，让后续想法"从上次的经验出发"而不是从零开始。**Git 纪律**：每个执行器在独立 worktree/分支工作，`main` 在满意前始终不被污染，验证过的改进才合并进 `trunk`。
 
-**Then run it on your own task:**
+---
 
-```bash
-arbor quickstart  # ~2 min: a free key (Gemini/Groq) or a local model (Ollama)
-arbor             # start an interactive session in the current directory
-```
+## 👥 给组员：跑 MLE-Bench Lite 其他任务
 
-Already have a provider? `arbor setup` runs the full provider / model / base_url / API key
-flow; `arbor doctor` diagnoses the install. Both `quickstart` and `setup` write
-`~/.arbor/config.yaml`, so day-to-day you can just run `arbor`
-with no flags. The first thing Arbor does is an **intake conversation** that turns your
-goal, target directory, metric, baseline, budget, dev/test discipline, and artifact
-paths into a one-screen **Arbor Research Contract**. Read/discuss requests stay in a
-scoped, read-only mode; experiment plans are staged and launch only after a later explicit
-confirmation. Once you confirm the resolved contract, the live dashboard takes over.
+跑 V2 跑其他 MLE-Bench Lite 任务（环境、Qwen 百炼配置、任务目录结构、启动命令、注意事项）请看：
+
+👉 **[`docs/V2_MLE_LITE_RUN_GUIDE.md`](docs/V2_MLE_LITE_RUN_GUIDE.md)** — V2 快照说明 + 快速启动 + 避坑清单
+
+---
+
+## 🚀 快速开始
+
+**环境要求**：Python ≥ 3.10 + Git。
 
 ```bash
-# Point at a benchmark directory and a config
+# 安装
+pip install -e .          # 或: uv pip install -e .
+arbor doctor              # 检查 PATH / git / API keys
+
+# 配置基座模型（Qwen 走阿里云百炼 DashScope，openai-chat 兼容端点）
+arbor setup
+
+# 在基准目录上启动一次研究
 arbor --cwd ./benchmark --config research_config.yaml
-
-# Give an initial goal up front; intake refines the rest
-arbor "improve validation score without touching the test split" --cwd ./benchmark
-
-# Small dry run
-arbor --cwd ./benchmark --config research_config.yaml --max-cycles 3
 ```
 
-During a run you can type `/status`, `/tree`, `/evidence`, `/branches`, `/cost`,
-`/pause`, `/resume`, `/report`, or `/abort`.
-
-### Prepare a benchmark
-
-Your target directory should have:
-
-- a runnable evaluation script (e.g. `run_eval.py`),
-- evaluation data (ideally a **dev** split and a held-out **test** split), and
-- a clean git repository (no uncommitted changes).
-
-A minimal `research_config.yaml`:
+最小配置示例（`research_config.yaml`）：
 
 ```yaml
-# LLM/API live in `arbor setup`; project config is usually just the task and budget.
 task: >
-  Optimize the agent's accuracy on the benchmark.
-  Do NOT modify the evaluation harness or data files.
+  优化智能体在该基准上的指标（quadratic weighted kappa / accuracy）。
+  不得修改评估框架或数据文件。
 
 coordinator:
-  max_cycles: 10          # arbor cycles to explore
-  max_depth: 2            # Idea Tree depth
-  merge_threshold: 5.0    # min held-out % gain to merge into trunk
+  max_cycles: 10          # arbor cycle 轮数
+  max_depth: 3            # 想法树深度
+  merge_threshold: 0.5    # 合并到主干所需的留出集最低提升
   ui:
-    interaction_mode: review   # auto | direction | review | collaborative
+    interaction_mode: auto   # auto | direction | review | collaborative
 
 executor:
   max_turns: 100
 ```
 
-A copy-pasteable example with every option lives in
-[`examples/research_config.example.yaml`](examples/research_config.example.yaml).
-
-### Try the runnable example task
-
-If you just want to watch Arbor work end-to-end — **no API budget, no GPU** —
-[`examples/algotune_knn/`](examples/algotune_knn) is a tiny, self-contained
-benchmark modeled on [AlgoTune](https://algotune.io/). The task is to make a
-brute-force k-nearest-neighbours solver **faster** while producing the **same**
-output; the metric is the speedup over a reference implementation. It is pure
-NumPy, CPU-only, sub-second, and deterministic, with several genuine
-optimizations for the Idea Tree to discover.
-
-```bash
-cp -r examples/algotune_knn /tmp/algotune_knn   # run outside the Arbor checkout
-cd /tmp/algotune_knn
-git init -q && git add -A && git commit -qm baseline
-arbor
-```
-
-In one 6-cycle run this drove the dev speedup from **1.01x → 7.77x** (held-out
-test **1.00x → 7.22x**). See [`examples/algotune_knn/README.md`](examples/algotune_knn/README.md)
-for the research contract and tuning knobs.
-
-### Collect a benchmark from a request (experimental)
-
-You don't have to assemble a benchmark by hand. `arbor benchmark add` turns a
-one-line request into a runnable **draft task**: it finds the dataset/benchmark and,
-on an interactive terminal, asks you **which dataset** to use and **where the
-baseline comes from** — harvest an existing implementation, implement the method you
-described, or find one online — then acquires the data and brings up a draft
-(baseline + eval + `README` + provenance). It does *not* force-run the eval; a real
-run may need your served model / API key.
-
-```bash
-# name a work, or give a goal + a method
-arbor benchmark add "get me the datasets WebThinker uses"
-arbor benchmark add "I want to climb GPQA with a self-consistency baseline"
-
-# or point straight at a repo / HF dataset (add --bringup to also build the baseline)
-arbor benchmark add https://github.com/owner/repo --name my-bench --bringup
-```
-
-Drafting is automated; acceptance stays human. `arbor benchmark verify <dir>`
-structurally checks a pack, and `arbor benchmark list` indexes the zoo. See the
-[benchmark zoo overview](docs/zoo-overview.md) for the format and the full flow.
+运行中可用 `/status`、`/tree`、`/evidence`、`/branches`、`/cost`、`/report`、`/abort` 控制与查看。
 
 ---
 
-## 🧠 How It Works
+## 🧰 常用 CLI
 
-### The arbor cycle
-
-Each cycle runs six steps:
-
-```
-① OBSERVE   analyze current results and failure modes
-② IDEATE    propose 1–3 new ideas from the analysis and tree insights
-③ SELECT    pick the highest-priority idea to test
-④ DISPATCH  run an Executor on it in an isolated git worktree
-⑤ BACKPROP  record the result; abstract the insight up to ancestor nodes
-⑥ DECIDE    continue / merge into trunk / prune / stop
-```
-
-
-### The Idea Tree
-
-```
-ROOT (baseline: 20%)
-├── 1: Retrieval optimization        [insight: "retrieval quality is the bottleneck"]
-│   ├── 1.1: Constraint decomposition + verification   [40%, merged]
-│   ├── 1.2: Periodic re-read injection                [40%, pruned — no net gain]
-│   └── 1.3: Answer-extraction tuning                  [35%, pruned]
-├── 2: Multi-perspective search      [insight: "search scaffolding hurts here"]
-│   └── 2.1: Breadth-first search                      [25%, pruned]
-└── 3: Code-level intervention       [insight: "code-level > prompt-level"]
-    ├── 3.1: Continuation injection                    [70%, merged]
-    └── 3.2: ANSWER-tag extraction                     [45%, done]
-```
-
-- **Depth 0 (Root):** the research objective and global insights.
-- **Depth 1:** research directions (paper-title-level ideas).
-- **Depth 2+:** concrete methods, implemented and tested by Executors.
-
-### Git strategy & evaluation
-
-Each Executor works in its own worktree on a dedicated branch. Verified improvements merge
-into a per-run `trunk`; you promote `trunk` into `main` only when satisfied
-(`git merge research/run_xxx/trunk`). Executors iterate on a **dev** split, but a change is
-kept only if it clears a margin on the **held-out test** split — guarding against
-overfitting.
-
-### Human-in-the-loop
-
-Set `ui.interaction_mode` (or `--interaction-mode`) to choose how much you steer:
-
-| Mode | Behavior |
-| --- | --- |
-| `auto` | Fully autonomous. |
-| `direction` | Asks you where to go next at ideation. |
-| `review` | Pauses before each node and Executor. |
-| `collaborative` | `direction` + `review`. |
-
-When paused, your input opens an isolated discussion with a read-only companion — it never
-pollutes the Coordinator's context. See [`docs/`](docs/index.md) for the full method.
+| 命令 | 功能 |
+|---|---|
+| `arbor` | 启动交互式研究会话 |
+| `arbor --continue` | 继续上一段未完成的规划对话 |
+| `arbor replay --demo` | 回放内置示例运行，无需 API key |
+| `arbor report <session>` | 重新渲染某次会话的 REPORT |
+| `arbor idea-check "<想法>"` | 对照 alphaXiv 做新颖性 / 先行工作审查 |
+| `arbor web <session>` | 打开只读浏览器监控 |
+| `arbor --resume --run-name <name>` | 断点恢复一次运行 |
 
 ---
 
-## ⚙️ Configuration
+## 🗂️ 项目结构
 
-LLM access is configured once with `arbor setup` (stored in `~/.arbor/config.yaml`) via a
-single `provider` field:
-
-| `provider` | Use it for |
-| --- | --- |
-| `auto` *(default)* | Let Arbor pick. It probes your endpoint's OpenAI **Responses** API and uses it when available (reasoning chain preserved), otherwise falls back to chat completions; Claude models use the native Anthropic API. The detected backend is frozen into the config. |
-| `openai-responses` | OpenAI / o-series models via the Responses API (encrypted reasoning chain preserved across turns). |
-| `openai-chat` | Any OpenAI-compatible chat-completions endpoint — DeepSeek / Qwen / GLM / vLLM / Ollama / local gateways. |
-| `anthropic` | Claude via the native Anthropic Messages API (signed thinking + prompt caching). |
-
-Most users just run `arbor setup`, keep `auto`, and fill in `model` + `base_url`. Keys come
-from the environment or the config; per-project task and budget settings live in
-`research_config.yaml`. See the
-[configuration guide](https://RUC-NLPIR.github.io/Arbor/docs/configuration/) and
-[`examples/research_config.example.yaml`](examples/research_config.example.yaml) for every
-option.
-
----
-
-## 🧰 CLI Reference
-
-Day to day you only need `arbor`:
-
-| Command | What it does |
-| --- | --- |
-| `arbor` | Start an interactive research session. |
-| `arbor --continue` (`-C`) | Resume the most recent unfinished planning conversation in this directory (like `claude -c`). |
-| `arbor replay --demo` | Replay a bundled sample run in the live dashboard — no API key needed. Add `--html` for a shareable browser page. |
-| `arbor replay <session>` | Replay any past run's `events.jsonl` from its timeline (`--html` to export an interactive page). |
-| `arbor quickstart` | Get running fast with a free key (Gemini/Groq) or a local model (Ollama). |
-| `arbor setup` | Configure provider / model / keys → `~/.arbor/config.yaml`. |
-| `arbor report <session>` | Re-render `REPORT.md` for a past session. |
-| `arbor idea-check "<idea>"` | Novelty / prior-art check for one idea against alphaXiv (built in on Python ≥ 3.12). |
-| `arbor export <session> [output]` | Export a past session to self-contained HTML, or JSONL when `output` ends in `.jsonl`. |
-| `arbor doctor` | Diagnose install, PATH, git, and API keys. |
-| `arbor version` | Print the installed version. |
-| `arbor install` / `arbor uninstall` | Install/remove the Agent Skill suite into a coding agent (`--claude` / `--codex` / `--project` / `--target`). |
-| `arbor mcp` | Run Arbor's keyless deterministic tools as an MCP server (needs the `[mcp]` extra). |
-| `arbor web <session>` | Open a read-only browser monitor for a session (works without a live run). |
-
-Lower-level entry points (`run-research`, `coordinator`, `executor`, `review-research`)
-remain for debugging — see the [CLI reference](https://RUC-NLPIR.github.io/Arbor/docs/cli/).
-
----
-
-## 🔎 Literature Search & Novelty Checks
-
-Good research starts by knowing what already exists. Arbor ships a **zero-config
-search backend** over the public [alphaXiv](https://www.alphaxiv.org) API — no
-self-hosted search service, no alphaXiv key — so it can survey related work and
-judge an idea's novelty. The verdict is lightweight and decision-oriented: a short
-summary of the space, the closest related papers, a `novel` / `partial-overlap` /
-`prior-art-exists` assessment, and the concrete overlap risks.
-
-### Enable it
-
-Nothing to install — the backend ships with Arbor by default on **Python ≥ 3.12**
-(it bundles `alphaxiv-py`). It reuses your existing Arbor LLM credentials, so
-`arbor idea-check` works out of the box. (On Python 3.10/3.11 `alphaxiv-py` is
-unavailable and the backend degrades with a clear message.)
-
-### Use it three ways
-
-**1. Standalone — check one idea, no run required.** The fastest way to sanity-check
-a direction before you invest in it:
-
-```bash
-arbor idea-check "Use entity-relation scratchpads to improve multi-hop QA"
-arbor idea-check "tree search over plans for code generation" --json   # raw JSON
 ```
-
-**2. Pre-experiment — vet every idea automatically.** Turn on `auto_search_on_add`
-and the Coordinator dispatches a background novelty check the moment a new idea is
-added to the tree; the verdict lands in that node's `related_work` field *before* an
-Executor ever runs, so Arbor can revise or prune non-novel ideas instead of spending
-compute on them:
-
-```yaml title="research_config.yaml"
-search:
-  enabled: true
-  builtin_backend: alphaxiv     # none | alphaxiv
-  auto_search_on_add: true      # novelty-check each new idea before running it
-```
-
-**3. Post-experiment — annotate what worked.** By default (`auto_search_on_add:
-false`) Arbor still surveys related work for ideas that *beat the trunk*, attaching
-prior-art context right before a merge decision — so wins arrive with citations.
-
-### Turn it off
-
-In a run it is **off by default**: `builtin_backend` is `none`, so unless you set
-`search.builtin_backend: alphaxiv` (and, for pre-experiment checks,
-`auto_search_on_add: true`), Arbor never touches the network for literature.
-`arbor idea-check` is opt-in by nature — you only pay when you call it. Prefer your
-own search service? The bring-your-own-endpoint path still works via
-`search.web_search_endpoint` for a self-hosted BrowseComp-style backend.
-
-See the [configuration guide](https://RUC-NLPIR.github.io/Arbor/docs/configuration/)
-and [`arbor idea-check`](https://RUC-NLPIR.github.io/Arbor/docs/cli/#arbor-idea-check)
-for every option.
-
----
-
-## 🔌 Plugins & Skills
-
-A single line retargets the agent to a new domain — evaluation protocol, protected
-data directories, required outputs, and timeout presets all come from the plugin:
-
-```yaml
-plugin: mle_kaggle   # switches to Kaggle/MLE mode
-```
-
-A plugin is one YAML file (prompt-injection points + config overrides + profiles +
-lifecycle hooks + an eval contract); a Skill is a markdown playbook the agent loads on
-demand at runtime. A copy-pasteable Kaggle config lives in
-[`examples/kaggle_config.example.yaml`](examples/kaggle_config.example.yaml).
-
----
-
-## 💾 Output & Resume
-
-Each run writes a session directory with `REPORT.md`, `events.jsonl`, `run_stats.json`, the
-Idea Tree, and per-experiment artifacts under `.arbor/sessions/`. Runs are resumable —
-interrupt with `Ctrl+C` and continue later with `--resume`; Arbor reloads the Idea Tree and
-picks up where it left off.
-
-```bash
-arbor report .arbor/sessions/<run_name>   # re-render a past report
-arbor export <run_name>                   # write .arbor/sessions/<run_name>/arbor-session-<run_name>.html
-arbor export <run_name> session.jsonl     # export a JSONL artifact bundle
-arbor --resume --run-name <run_name>      # continue an interrupted run
+src/                 # `arbor` 包
+├── core/            共享基础设施：ReAct 循环、工具、LLM 提供方、上下文管理
+│   ├── agent.py     执行器 ReAct 循环 + V2 收敛引擎（score-gated idle clock）
+│   └── context.py   上下文管理 + A4 增量 token 缓存
+├── executor/        Executor 智能体 + executor CLI
+├── coordinator/     Coordinator、Idea Tree、收敛检测器、orchestrator
+├── cli/             arbor CLI：intake、实时仪表盘、setup、doctor、config
+├── events/          类型化事件总线与载荷
+├── report/          报告生成
+├── webui/           只读运行监控 Web 服务器
+├── plugins/         领域插件（mle_kaggle 等）
+└── skills/          按需加载的 Markdown 手册
+result/              实验结果（V2 vs V1 对照，含完整 APTOS 记录）
 ```
 
 ---
 
-## 📊 Results
+## 📚 致谢与引用
 
-Arbor was evaluated as a single controller across model training, harness engineering,
-and data synthesis — only the material, objective, evaluator, and budget change. It
-wins the held-out test on all six tasks against strong single-agent baselines.
+本仓库构建于开源项目 **Arbor**（[RUC-NLPIR/Arbor](https://github.com/RUC-NLPIR/Arbor)）之上，并针对"任务规划 → 实验运行 → 数据分析 → 反馈迭代"的科研闭环做了 V2 优化（收敛引擎 + 增量 token 缓存）。Arbor 的 CLI 框架建立在开源项目 [claw-code](https://github.com/ultraworkers/claw-code) 之上。
 
-| Task | Direction | Initial | Codex | Claude Code | **Arbor** | Gain |
-| --- | --- | --- | --- | --- | --- | --- |
-| Optimizer Design | steps ↓ | 3325 | 3325 | 3287.5 | **3237.5** | +2.63% |
-| Architecture Design | loss ↓ | 1.098 | 1.083 | 1.033 | **1.028** | +6.38% |
-| Terminal-Bench 2.0 | pass ↑ | 69.81 | 73.59 | 71.70 | **77.36** | +7.55 |
-| BrowseComp | acc ↑ | 45.33 | 50.00 | 53.33 | **67.67** | +22.34 |
-| Search-Agent Data | gap ↑ | 5.00 | 9.00 | 12.00 | **18.00** | +13.0 |
-| Math-Reasoning Data | gap ↑ | 1.04 | 6.25 | 8.33 | **20.83** | +19.79 |
-
-On **MLE-Bench Lite** with GPT-5.5, Arbor reaches **86.36% Any-Medal** (100% valid
-submissions, 95.45% above median, 77.27% gold). See the [paper](https://arxiv.org/pdf/2606.11926)
-for full protocols and ablations.
-
-
----
-
-## 🗂️ Project Structure
-
-The code lives in `src/` and is imported as the `arbor` package.
-
-```
-src/                 # the `arbor` package
-├── core/            Shared infrastructure: ReAct loop, tools, LLM providers, context mgmt
-├── executor/        Executor agent + `executor` CLI
-├── coordinator/     Coordinator agent, Idea Tree, orchestrator, coordinator tools
-├── cli/             `arbor` CLI: intake, live dashboard, setup, doctor, config
-├── events/          Typed event bus and payloads
-├── report/          Report generation
-├── webui/           Read-only run-monitoring web server
-├── plugins/         Domain plugins (e.g. mle_kaggle.yaml)
-├── skills/          On-demand markdown playbooks
-├── dashboard.py     HTML dashboard generator
-├── run.py           `run-research` CLI
-└── review.py        `review-research` CLI
-```
-
----
-
-## 🙏 Acknowledgements
-
-Arbor is built on the excellent foundation of
-[claw-code](https://github.com/ultraworkers/claw-code).
-
-claw-code is an open-source Rust reimplementation of Claude Code. It provided
-the REPL framework, tool-calling infrastructure, and cross-platform compilation
-that made Arbor's CLI possible. Huge thanks to the ultraworkers team for their
-outstanding work.
-
-🔗 claw-code: https://github.com/ultraworkers/claw-code
-
----
-
-## 📚 Citation
+基座模型使用 **Qwen 系列**，通过 **阿里云百炼（DashScope）** 调用。
 
 ```bibtex
 @misc{jin2026arbor,
@@ -595,37 +210,12 @@ outstanding work.
             Linjie Li and Lijuan Wang and Hongjin Qian and Yutao Zhu and Zhicheng Dou},
   year   = {2026},
   eprint = {2606.11926},
-  archivePrefix = {arXiv},
-  url    = {https://arxiv.org/abs/2606.11926}
+  archivePrefix = {arXiv}
 }
 ```
 
 ---
 
-## Star History
-
-<picture>
-  <source
-    media="(prefers-color-scheme: dark)"
-    srcset="https://api.star-history.com/svg?repos=RUC-NLPIR/Arbor&type=Date&theme=dark"
-  />
-  <source
-    media="(prefers-color-scheme: light)"
-    srcset="https://api.star-history.com/svg?repos=RUC-NLPIR/Arbor&type=Date"
-  />
-  <img
-    alt="Star History Chart"
-    src="https://api.star-history.com/svg?repos=RUC-NLPIR/Arbor&type=Date"
-  />
-</picture>
-
----
-
 ## 📄 License
 
-Released under the [Apache License 2.0](LICENSE).
-
----
-
-Built at the Gaoling School of Artificial Intelligence, Renmin University of China, and
-Microsoft Research.
+[Apache License 2.0](LICENSE)
