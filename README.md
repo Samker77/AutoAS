@@ -121,6 +121,10 @@ Arbor 由两个协同的智能体组成，重复执行六步 **arbor cycle**：
 
 👉 **[`docs/V2_MLE_LITE_RUN_GUIDE.md`](docs/V2_MLE_LITE_RUN_GUIDE.md)** — V2 快照说明 + 快速启动 + 避坑清单
 
+跑完任务后如何写报告（8 个必填板块 + 汇总表 + 两条红线）见：
+
+👉 **[`docs/组员报告要求.md`](docs/组员报告要求.md)** — 报告模板与提交要求
+
 ---
 
 ## 🚀 快速开始
