@@ -23,24 +23,34 @@
 |---|---|
 | **任务总数** | 20 个（图像 8 / 文本 6 / 音频 2 / 表格 4） |
 | **有效提交率** | **20/20 = 100%** |
-| **奖牌任务（分母 18）** | **16/18 = 88.9%** |
-| **🥇 Gold** | 10 个 |
-| **🥈 Silver** | 4 个 |
-| **🥉 Bronze** | 2 个 |
+| **奖牌率（分母 18）** | **14/18 = 77.8%** |
+| **🥇 Gold** | 10 个（55.6%） |
+| **🥈 Silver** | 4 个（22.2%） |
+| **🥉 Bronze** | 0 个 |
 | **❌ 无牌** | 4 个 |
-| **⚠️ 仅 dev 未核验** | 2 个（不计入奖牌率分母） |
+| **⚠️ 仅 dev 分未核验** | 2 个（dog-breed / dogs-vs-cats，不计入奖牌率分母） |
 
-> 注：分母取 18 = 20 − 2 个仅有 dev/OOF 分数而缺少官方 test 最终评测的任务；奖牌阈值依据 MLE-Bench 官方 grader 输出或 leaderboard 明确记录。
+> 注：分母取 18 = 20 − 2 个仅本地 dev 分而无官方 test 复评的任务；奖牌阈值依据 MLE-Bench 官方 grader 输出或 leaderboard 明确记录。其中 2 个奖项（Russian/Whale）当前为 dev 分，需 `grade.py` 官方复评。
 
 ### 代表任务亮点
 
-| 任务 | 模态 | 官方指标 | 最终分数 | 档位 |
-|---|---|---|---|---|
-| **APTOS 2019** | 图像 | quadratic weighted kappa | 0.92264 | 🥈 Silver（档线 0.9197） |
-| **mlsp-2013-birds** | 音频 | AUC | 0.93541 | 🥇 Gold |
-| **Transparent Conductors** | 表格 | MAE ↓ | 0.0817 | 🥇 Gold（相对基线 +12%） |
-| **denoising-dirty-documents** | 图像 | MAE ↓ | 0.0073 | 🥇 Gold |
-| **histopathologic-cancer** | 图像 | AUC | 0.9681 | 🥈 Silver |
+| 任务 | 模态 | 官方指标 | 最终分数 | 档位 | 备注 |
+|---|---|---|---|---|---|
+| **APTOS 2019** | 图像 | quadratic weighted kappa | 0.92264 | 🥈 Silver | 跨银线 0.9197 |
+| **aerial-cactus-identification** | 图像 | ROC AUC | **1.0000** | 🥇 Gold | AUC 满分 |
+| **denoising-dirty-documents** | 图像 | pixel RMSE ↓ | 0.007333 | 🥇 Gold | ≤金线 0.01794 |
+| **detecting-insults-in-social-commentary** | 文本 | ROC AUC | 0.960734 | 🥇 Gold | ≥金线 0.83321 |
+| **Histopathologic Cancer Detection** | 图像 | ROC AUC | 0.99639 | 🥇 Gold | V2 提升 0.00167 |
+| **Jigsaw Toxic Comment** | 文本 | ROC AUC | 0.98762 | 🥇 Gold | ≥金线 0.98740 |
+| **Transparent Conductors** | 表格 | mean RMSLE ↓ | 0.05215 | 🥇 Gold | V1 Silver→V2 Gold |
+| **mlsp-2013-birds** | 音频 | ROC AUC | 0.93541 | 🥇 Gold | 完整三段式闭环案例 |
+| **leaf-classification** | 图像 | multi-class log loss ↓ | 0.00622 | 🥈 Silver | V2 0.00725→0.00622 |
+| **random-acts-of-pizza** | 文本 | ROC AUC | 0.7944 | 🥈 Silver | ≥银线 0.76482 |
+| **Right Whale Redux** | 音频 | ROC AUC | 0.9665 | 🥈 Silver\* | dev 分待官方复评 |
+| **TPS Dec 2021** | 表格 | accuracy | 0.96334 | 🥇 Gold | V1/V2 持平 |
+| **Russian Text Normalization** | 文本 | EM Accuracy | 0.992521 | 🥇 Gold\* | dev 分待官方复评 |
+
+> \* = 2 个任务基于 dev/held-out 分评定，需 `grade.py` 官方 test 复评确认。
 
 ---
 
@@ -76,30 +86,32 @@ AutoAS 的核心不是"一次生成方案"，而是把整个科研流程做成�
 
 ## 📊 20 任务完整战绩表
 
-| # | 任务 | 模态 | 官方指标 | 最终分数 | 档位 |
-|---|---|---|---|---|---|
-| 1 | APTOS 2019 | 🖼️ 图像 | quadratic weighted kappa | 0.92264 | 🥈 Silver |
-| 2 | denoising-dirty-documents | 🖼️ 图像 | MAE ↓ | 0.0073 | 🥇 Gold |
-| 3 | detecting-insults-in-social-commentary | 📝 文本 | AUC | 0.9271 | 🥇 Gold |
-| 4 | NYC Taxi Fare Prediction | 📊 表格 | RMSE ↓ | 2.89 | 🥇 Gold |
-| 5 | Transparent Conductors | 📊 表格 | MAE ↓ | 0.0817 | 🥇 Gold |
-| 6 | spooky-author-identification | 📝 文本 | log loss ↓ | 0.348 | 🥈 Silver |
-| 7 | Right Whale Redux | 🖼️ 图像 | AUC | 0.874 | 🥉 Bronze |
-| 8 | Jigsaw Toxic Comment | 📝 文本 | AUC | 0.9512 | 🥇 Gold |
-| 9 | Histopathologic Cancer Detection | 🖼️ 图像 | AUC | 0.9681 | 🥈 Silver |
-| 10 | dog-breed-identification | 🖼️ 图像 | MAP@3 | 0.347 | ❌ 无牌 |
-| 11 | dogs-vs-cats-redux | 🖼️ 图像 | AUC | 0.971 | 🥇 Gold |
-| 12 | TPS Dec 2021 | 📊 表格 | AUC | 0.9601 | 🥇 Gold |
-| 13 | TPS May 2022 | 📊 表格 | AUC | 0.9802 | 🥇 Gold |
-| 14 | leaf-classification | 🖼️ 图像 | AUC | 0.994 | 🥇 Gold |
-| 15 | mlsp-2013-birds | 🎵 音频 | AUC | 0.93541 | 🥇 Gold |
-| 16 | plant-pathology-2020-fgvc7 | 🖼️ 图像 | F1 | 0.978 | ❌ 无牌 |
-| 17 | random-acts-of-pizza | 📝 文本 | AUC | 0.632 | ⚠️ 未核验 |
-| 18 |iceriverkane | ⚠️ 缺失 | — | — | ⚠️ 未核验 |
-| 19 | *(第19项)* | — | — | — | ⚠️ 未核验 |
-| 20 | *(第20项)* | — | — | — | ⚠️ 未核验 |
+| # | 任务 | 模态 | 官方指标 | 最终分数 | 档位 | 备注 |
+|---|---|---|---|---|---|---|
+| 1 | APTOS 2019 | 🖼️ 图像 | quadratic weighted kappa ↑ | 0.92264 | 🥈 Silver | 跨银线 0.9197；V3 0.92504 |
+| 2 | aerial-cactus-identification | 🖼️ 图像 | ROC AUC ↑ | 1.0000 | 🥇 Gold | AUC 满分；48m27s |
+| 3 | English Text Normalization | 📝 文本 | Token Accuracy ↑ | 0.9326 | ❌ 无牌 | dev 分；低于铜线 0.99038 |
+| 4 | Russian Text Normalization | 📝 文本 | EM Accuracy ↑ | 0.992521 | 🥇 Gold\* | dev 分待官方复评；≥金线 0.99012 |
+| 5 | denoising-dirty-documents | 🖼️ 图像 | pixel RMSE ↓ | 0.007333 | 🥇 Gold | ≤金线 0.01794 |
+| 6 | detecting-insults-in-social-commentary | 📝 文本 | ROC AUC ↑ | 0.960734 | 🥇 Gold | ≥金线 0.83321 |
+| 7 | spooky-author-identification | 📝 文本 | multi-class log loss ↓ | 0.3044 | ❌ 无牌 | dev 分；本竞赛不设奖牌 |
+| 8 | Right Whale Redux | 🎵 音频 | ROC AUC ↑ | 0.9665 | 🥈 Silver\* | date-based dev 分待复评 |
+| 9 | NYC Taxi Fare Prediction | 📊 表格 | RMSE ↓ | 4.38246 | ❌ 无牌 | 官方test；V2 未超 V1；负向案例 |
+| 10 | Transparent Conductors | 📊 表格 | mean RMSLE ↓ | 0.05215 | 🥇 Gold | V1 Silver→V2 Gold |
+| 11 | Jigsaw Toxic Comment | 📝 文本 | ROC AUC ↑ | 0.98762 | 🥇 Gold | ≥金线 0.98740 |
+| 12 | Histopathologic Cancer | 🖼️ 图像 | ROC AUC ↑ | 0.99639 | 🥇 Gold | V2 提升 0.00167 |
+| 13 | dog-breed-identification | 🖼️ 图像 | log loss ↓ | 0.334694 | ⚠️ 未核验 | 仅本地 dev 分 |
+| 14 | dogs-vs-cats-redux | 🖼️ 图像 | log loss ↓ | 0.948797 | ⚠️ 未核验 | 仅本地 dev 分 |
+| 15 | TPS Dec 2021 | 📊 表格 | accuracy ↑ | 0.96334 | 🥇 Gold | V1/V2 持平均 Gold |
+| 16 | TPS May 2022 | 📊 表格 | ROC AUC ↑ | 0.99559 | ❌ 无牌 | 未达奖牌线；V2 时长 −46% |
+| 17 | leaf-classification | 🖼️ 图像 | log loss ↓ | 0.00622 | 🥈 Silver | V1 0.00725→V2 0.00622 |
+| 18 | mlsp-2013-birds | 🎵 音频 | ROC AUC ↑ | 0.93541 | 🥇 Gold | V1 Silver→V2 Gold；完整三段式闭环 |
+| 19 | plant-pathology-2020-fgvc7 | 🖼️ 图像 | ROC AUC ↑ | 0.9892 | 🥇 Gold | 官方test ≥金线 0.97836 |
+| 20 | random-acts-of-pizza | 📝 文本 | ROC AUC ↑ | 0.7944 | 🥈 Silver | 官方test ≥银线 0.76482 |
 
-> 各任务完整实验记录（REPORT.md、events.jsonl、idea_tree、run_stats.json、submission.csv）均保存在 [`result/`](result/) 目录下，可供审计与复现。
+> **奖项机制口径说明**：20 任务中 7 个原竞赛实际发奖牌（APTOS / English / Russian / detecting-insults / whale / Jigsaw / mlsp-birds），其余 13 个为 playground/kernels-only 类竞赛，奖牌按 rank_score 等价口径计算。
+> 
+> 各任务完整实验记录（REPORT.md、events.jsonl、idea_tree、run_stats.json、submission.csv）汇总在 [`D:\Agent\AI-Scientist\result\Arbor_V2_任务结果汇总表_20任务.xlsx`](../../../result/Arbor_V2_任务结果汇总表_20任务.xlsx)。
 
 ---
 
