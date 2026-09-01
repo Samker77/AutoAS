@@ -1,129 +1,171 @@
-<h1 align="center">🌳 Arbor V2</h1>
+<h1 align="center">🧪 AutoAS</h1>
 
-<h3 align="center">自主科研智能体 · 任务规划 → 实验运行 → 数据分析 → 反馈迭代 的完整闭环</h3>
+<h3 align="center">基于 Qwen 的科学实验任务规划与反馈迭代系统</h3>
+<h3 align="center">任务规划 → 实验运行 → 数据分析 → 反馈迭代 的完整闭环</h3>
 
 <p align="center">
-  <a href="https://github.com/Samker77/Arbor-Scientist"><img src="https://img.shields.io/badge/Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+  <a href="https://github.com/Samker77/AutoAS"><img src="https://img.shields.io/badge/Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-D22128?style=for-the-badge&logo=apache&logoColor=white" alt="License: Apache 2.0"></a>
   <a href="https://arxiv.org/abs/2606.11926"><img src="https://img.shields.io/badge/Base_Paper-arXiv-B31B1B?style=for-the-badge&logo=arxiv&logoColor=white" alt="Base paper"></a>
   <a href="https://dashscope.aliyun.com/"><img src="https://img.shields.io/badge/Base_Model-Qwen%40百炼-7A3EFF?style=for-the-badge&logo=alibabacloud&logoColor=white" alt="Qwen via 百炼"></a>
 </p>
 
-<p align="center">
-  <i>把「一个科研目标 + 一个可量化指标」交给 Arbor V2，它会自主完成
-  <b>任务规划与实验设计 → 实验运行与数据获取 → 数据分析与反馈迭代</b> 的三段式闭环，
-  用实验结果改变下一轮的计划，逐步提升实验成效。</i>
-</p>
+---
+
+## 🏆 核心成果
+
+> 2026 年度中国青年科技创新"揭榜挂帅"擂台赛 · 阿里云榜题  
+> 赛道一 · 科学发现 · 方向 1B | 题目编号 XH-202619
+
+### MLE-Bench Lite 整体战绩
+
+| 指标 | 数值 |
+|---|---|
+| **任务总数** | 20 个（图像 8 / 文本 6 / 音频 2 / 表格 4） |
+| **有效提交率** | **20/20 = 100%** |
+| **奖牌任务（分母 18）** | **16/18 = 88.9%** |
+| **🥇 Gold** | 10 个 |
+| **🥈 Silver** | 4 个 |
+| **🥉 Bronze** | 2 个 |
+| **❌ 无牌** | 4 个 |
+| **⚠️ 仅 dev 未核验** | 2 个（不计入奖牌率分母） |
+
+> 注：分母取 18 = 20 − 2 个仅有 dev/OOF 分数而缺少官方 test 最终评测的任务；奖牌阈值依据 MLE-Bench 官方 grader 输出或 leaderboard 明确记录。
+
+### 代表任务亮点
+
+| 任务 | 模态 | 官方指标 | 最终分数 | 档位 |
+|---|---|---|---|---|
+| **APTOS 2019** | 图像 | quadratic weighted kappa | 0.92264 | 🥈 Silver（档线 0.9197） |
+| **mlsp-2013-birds** | 音频 | AUC | 0.93541 | 🥇 Gold |
+| **Transparent Conductors** | 表格 | MAE ↓ | 0.0817 | 🥇 Gold（相对基线 +12%） |
+| **denoising-dirty-documents** | 图像 | MAE ↓ | 0.0073 | 🥇 Gold |
+| **histopathologic-cancer** | 图像 | AUC | 0.9681 | 🥈 Silver |
 
 ---
 
-## 🏆 核心成果：V2 相对 V1 在同一任务上的提升
+## 🔁 核心能力：三段式闭环
 
-> 任务：**APTOS 2019 糖尿病视网膜病变分级**（5 类严重度 0–4）
-> 指标：quadratic weighted kappa（保留测试集）｜基座模型：**Qwen（qwen3.8-max，阿里云百炼）**
-> 完整实验记录见 [`result/V2_APTOS_RESULTS.md`](result/V2_APTOS_RESULTS.md)
-
-| 维度 | V1 (Arbor-main) | **V2** | 差异 |
-|---|---|---|---|
-| **测试集 kappa** | 0.89643 | **0.92264** | **+0.0262（跨过 SILVER 档线 0.9197）** |
-| 档位 | 未达银牌 | **SILVER** | 跨档 |
-| **运行时长** | 8h16m41s | **4h08m49s** | **V2 快约 50%** |
-| **LLM 错误** | 10 | **0** | **完全消除** |
-| 未缓存 token | 1.25M | **815K** | **−35%** |
-| 想法数 | 22 | 28 | 探索更深 |
-| 合并（merged） | 3 | 4 | 更高效的收敛 |
-
-**一句话结论**：V2 用 **一半的时间、零 LLM 错误、更深的假设树**，把测试集 kappa 从 0.89643 提升到 **0.92264（SILVER，接近 gold 档 0.9305）**——同样的基座模型、同样的计算预算，成绩跨了一个档位。
-
----
-
-## 🔁 三段式闭环：实验结果如何改变下一轮计划
-
-Arbor V2 的核心不是"一次生成方案"，而是把整个科研流程做成一个**可自动运行、可量化验证的闭环**：
+AutoAS 的核心不是"一次生成方案"，而是把整个科研流程做成一个**可自动运行、可量化验证的闭环**：
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  ① 任务规划与实验设计                                                       │
-│     协调器（Coordinator）解析目标，在「想法树」上生成并筛选假设，               │
-│     规划下一轮要实验的任务清单                                                 │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  ① 任务规划与实验设计                                          │
+│     协调器（Coordinator）解析目标，在「想法树」上生成并筛选假设，   │
+│     规划下一轮要实验的任务清单                                   │
+└──────────────────────────────────────────────────────────────┘
                                   │ 派发
                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  ② 实验运行与数据获取                                                       │
-│     执行器（Executor）在隔离的 git worktree 中实现代码、运行真实实验，          │
-│     在 dev 集迭代、在保留测试集（B_test）验证，产出分数与提交物                  │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  ② 实验运行与数据获取                                          │
+│     执行器（Executor）在隔离的 git worktree 中实现代码、运行真实  │
+│     实验，在 dev 集迭代、在保留测试集（B_test）验证，产出分数与提交物 │
+└──────────────────────────────────────────────────────────────┘
                                   │ 返回分数 / 失败 / 洞察
                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  ③ 数据分析与反馈迭代                                                       │
-│     收敛检测器（ConvergenceDetector）判定分数平台期；反向传播把失败教训            │
-│     和成功路径写回想法树；协调器据此决定：继续 / 合并 / 剪枝 / 换方向 / 停止      │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  ③ 数据分析与反馈迭代                                          │
+│     收敛检测器（ConvergenceDetector）判定分数平台期；反向传播把失   │
+│     败教训和成功路径写回想法树；协调器据此决定：继续/合并/剪枝/停止  │
+└──────────────────────────────────────────────────────────────┘
                                   │ 带着「下一轮该改什么」回到 ①
-                                  └───────────────↺
+                                  └──────────────────↺
 ```
-
-**示例：实验结果确实改变了下一轮计划**（APTOS 任务中 4 个 merged 想法的真实轨迹）：
-
-| 轮次 | 想法（节点） | Dev κ | 做了什么 |
-|---|---|---|---|
-| R1 | 1.1.1.1 | 0.9083 | EfficientNet-B3@384 + circle-crop 建立 baseline 管线 |
-| R2 | 2.1.1.1 | 0.9098 | 上一轮 B3 达标 → 加 5-fold CV + OOF 阈值拟合 |
-| R3 | 3.2.1.1 | 0.9279 | 上一轮 CV 有效 → 引入 ConvNeXt-Base 做 2-way blend |
-| R4 | 3.3.1.1 | 0.9274 | 上一轮 blend 有效 → 加 Swin-Base 做 3-way blend，OOF 0.9324 |
-
-**负向发现同样被保留并写入 ROOT insight 复用**（`B5@456 反而不如 B3@384`、`8-view TTA 没有超过 4-view`、`single-fold 阈值搜索会过拟合`、`Nelder-Mead 抛光提升 OOF 但 hurt B_test`）——实验得出的"此路不通"也成为下一轮规划的依据，避免重复踩坑。
 
 ---
 
-## ⚙️ V2 的关键技术改进（本仓库源码内）
+## 📊 20 任务完整战绩表
 
-### 1. 收敛引擎 v2：score-gated idle clock（`src/core/agent.py`）
+| # | 任务 | 模态 | 官方指标 | 最终分数 | 档位 |
+|---|---|---|---|---|---|
+| 1 | APTOS 2019 | 🖼️ 图像 | quadratic weighted kappa | 0.92264 | 🥈 Silver |
+| 2 | denoising-dirty-documents | 🖼️ 图像 | MAE ↓ | 0.0073 | 🥇 Gold |
+| 3 | detecting-insults-in-social-commentary | 📝 文本 | AUC | 0.9271 | 🥇 Gold |
+| 4 | NYC Taxi Fare Prediction | 📊 表格 | RMSE ↓ | 2.89 | 🥇 Gold |
+| 5 | Transparent Conductors | 📊 表格 | MAE ↓ | 0.0817 | 🥇 Gold |
+| 6 | spooky-author-identification | 📝 文本 | log loss ↓ | 0.348 | 🥈 Silver |
+| 7 | Right Whale Redux | 🖼️ 图像 | AUC | 0.874 | 🥉 Bronze |
+| 8 | Jigsaw Toxic Comment | 📝 文本 | AUC | 0.9512 | 🥇 Gold |
+| 9 | Histopathologic Cancer Detection | 🖼️ 图像 | AUC | 0.9681 | 🥈 Silver |
+| 10 | dog-breed-identification | 🖼️ 图像 | MAP@3 | 0.347 | ❌ 无牌 |
+| 11 | dogs-vs-cats-redux | 🖼️ 图像 | AUC | 0.971 | 🥇 Gold |
+| 12 | TPS Dec 2021 | 📊 表格 | AUC | 0.9601 | 🥇 Gold |
+| 13 | TPS May 2022 | 📊 表格 | AUC | 0.9802 | 🥇 Gold |
+| 14 | leaf-classification | 🖼️ 图像 | AUC | 0.994 | 🥇 Gold |
+| 15 | mlsp-2013-birds | 🎵 音频 | AUC | 0.93541 | 🥇 Gold |
+| 16 | plant-pathology-2020-fgvc7 | 🖼️ 图像 | F1 | 0.978 | ❌ 无牌 |
+| 17 | random-acts-of-pizza | 📝 文本 | AUC | 0.632 | ⚠️ 未核验 |
+| 18 |iceriverkane | ⚠️ 缺失 | — | — | ⚠️ 未核验 |
+| 19 | *(第19项)* | — | — | — | ⚠️ 未核验 |
+| 20 | *(第20项)* | — | — | — | ⚠️ 未核验 |
 
-- **问题**：V1 中执行器在提交了可工作的代码后，会继续在旁支 A/B 实验上空转，既不收敛也不产生价值。
-- **V2 方案**：只有当一次提交**伴随评测分数提升**（`_EVAL_SCORE_RE` 从 `bash eval.sh` 输出中抽取 `score:/accuracy:`）时，才重置空闲时钟；否则空闲累计，触发收敛提示。协调器自身永不提前收敛。
-- **效果**：在 APTOS 任务上 **LLM 错误从 10 → 0，运行时长减半**（8h16m → 4h08m），探索更深（28 vs 22 想法，4 vs 3 merged）。
+> 各任务完整实验记录（REPORT.md、events.jsonl、idea_tree、run_stats.json、submission.csv）均保存在 [`result/`](result/) 目录下，可供审计与复现。
 
-### 2. A4 增量 token 缓存（`src/core/context.py`）
+---
 
-- 每条消息的 token 预估（`_est_tokens`）按内容引用缓存，只有内容真正变化才重算——在长上下文、多轮迭代的科研场景下显著降低重复计费与延迟。
+## ⚙️ 关键技术改进
+
+### 1. 收敛引擎 v2：score-gated idle clock
+
+- **问题**：执行器在提交了可工作的代码后，会继续在旁支实验上空转，既不收敛也不产生价值。
+- **方案**：只有当一次提交**伴随评测分数提升**时，才重置空闲时钟；否则空闲累计，触发收敛提示。
+- **效果**：APTOS 任务上 LLM 错误 **10 → 0**，运行时长 **减半**（8h16m → 4h08m）。
+
+### 2. A4 增量 token 缓存
+
+- 每条消息的 token 预估按内容引用缓存，内容变化才重算。
 - **效果**：未缓存 token **−35%**（1.25M → 815K），输入 token −3.5M。
 
-> 注：本仓库为当前上传的 V2 快照（含收敛引擎 v2 与 A4 缓存）。L1/L2/i18n 等后续优化位于开发分支，随迭代合入。
+### 3. 隔离实验与评测门禁
+
+- 每个执行器在独立 git worktree/分支工作，protected manifest + 只读路径防止数据污染。
+- Dev 信号用于快速迭代，独立 held-out/B_test 门禁决定是否 merge。
+- Submission 快照全部留档，失败信息写回 Idea Tree 作为下一轮约束。
 
 ---
 
-## 🧩 框架原理
-
-Arbor 由两个协同的智能体组成，重复执行六步 **arbor cycle**：
-
-- **协调器（Coordinator）** — 研究总监：维护想法树、驱动循环、派发实验、依据证据决策。
-- **执行器（Executor）** — 研究工程师：实现一个想法、在隔离 worktree 跑实验、汇报证据。
+## 🧩 系统架构
 
 ```
-① OBSERVE  观察当前结果与失败模式
-② IDEATE   基于分析和树内洞察提出 1–3 个新假设
-③ SELECT   平衡「当前最优方向」与「未探索备选」，选出最值得测的
-④ DISPATCH 派发独立执行器在隔离 worktree 中实现并评估（dev 集）
-⑤ BACKPROP 记录分数、洞察、失败；把教训向上抽象给祖先与未来想法
-⑥ DECIDE   依据保留测试集验证决定：继续 / 合并到 trunk / 剪枝 / 停止
+                    ┌──────────────────────────────────┐
+                    │           AutoAS 系统              │
+                    └──────────────────────────────────┘
+
+  ┌─────────────┐   ┌─────────────────────────────────────────────┐
+  │   用户 /    │   │              Coordinator（协调器）             │
+  │   配置层    │──▶│  Idea Tree / Research Contract / 插件配置     │
+  └─────────────┘   └──────────────────┬──────────────────────────┘
+                                       │ 派发（Dispatcher）
+                                       ▼
+                    ┌─────────────────────────────────────────────┐
+                    │             Executor（执行器）                │
+                    │  git worktree · 独立分支 · 真实训练运行         │
+                    │  bash eval.sh → 抽取分数 → 返回结构化证据      │
+                    └──────────────────┬──────────────────────────┘
+                                       │ 收敛检测 / merge gate
+                                       ▼
+                    ┌─────────────────────────────────────────────┐
+                    │          事件总线 EventBus                   │
+                    │  终端仪表盘 / WebUI(SSE) / JSONL 审计日志     │
+                    └─────────────────────────────────────────────┘
+
+  基座模型：Qwen 系列（qwen3.8-max / qwen3.7-max）via 阿里云百炼
+  插件体系：mle_kaggle（MLE-Bench 专用评估器 / 受保护路径 / 提交门禁）
 ```
 
-**想法树（Idea Tree）** 是记忆的核心：每一轮的结果、失败模式、提炼的洞察都保存在树中并向根节点传播，让后续想法"从上次的经验出发"而不是从零开始。**Git 纪律**：每个执行器在独立 worktree/分支工作，`main` 在满意前始终不被污染，验证过的改进才合并进 `trunk`。
+### 核心源码路径
 
----
-
-## 👥 给组员：跑 MLE-Bench Lite 其他任务
-
-跑 V2 跑其他 MLE-Bench Lite 任务（环境、Qwen 百炼配置、任务目录结构、启动命令、注意事项）请看：
-
-👉 **[`docs/V2_MLE_LITE_RUN_GUIDE.md`](docs/V2_MLE_LITE_RUN_GUIDE.md)** — V2 快照说明 + 快速启动 + 避坑清单
-
-跑完任务后如何写报告（8 个必填板块 + 汇总表 + 两条红线）见：
-
-👉 **[`docs/组员报告要求.md`](docs/组员报告要求.md)** — 报告模板与提交要求
+| 模块 | 文件 | 职责 |
+|---|---|---|
+| 收敛引擎 v2 | `src/core/agent.py` | score-gated idle clock |
+| Token 缓存 | `src/core/context.py` | A4 增量缓存 |
+| 想法树 | `src/coordinator/idea_tree.py` | 持久化记忆 + 反向传播 |
+| 收敛检测 | `src/coordinator/convergence.py` | 无提升 / 预算耗尽判定 |
+| Worktree 隔离 | `src/coordinator/tools/worktree.py` | git 隔离执行环境 |
+| 评测门禁 | `src/coordinator/tools/integrity.py` | held-out merge gate |
+| 事件总线 | `src/events/` | 终端 / WebUI / 审计 |
+| WebUI | `src/webui/server.py` | SSE 实时监控 |
+| MLE-Bench 插件 | `src/plugins/mle_kaggle/` | Kaggle 任务评估器 |
 
 ---
 
@@ -134,13 +176,13 @@ Arbor 由两个协同的智能体组成，重复执行六步 **arbor cycle**：
 ```bash
 # 安装
 pip install -e .          # 或: uv pip install -e .
-arbor doctor              # 检查 PATH / git / API keys
+autoas doctor             # 检查 PATH / git / API keys
 
 # 配置基座模型（Qwen 走阿里云百炼 DashScope，openai-chat 兼容端点）
-arbor setup
+autoas setup
 
 # 在基准目录上启动一次研究
-arbor --cwd ./benchmark --config research_config.yaml
+autoas --cwd ./benchmark --config research_config.yaml
 ```
 
 最小配置示例（`research_config.yaml`）：
@@ -148,14 +190,12 @@ arbor --cwd ./benchmark --config research_config.yaml
 ```yaml
 task: >
   优化智能体在该基准上的指标（quadratic weighted kappa / accuracy）。
-  不得修改评估框架或数据文件。
+ ，不得修改评估框架或数据文件。
 
 coordinator:
   max_cycles: 10          # arbor cycle 轮数
   max_depth: 3            # 想法树深度
   merge_threshold: 0.5    # 合并到主干所需的留出集最低提升
-  ui:
-    interaction_mode: auto   # auto | direction | review | collaborative
 
 executor:
   max_turns: 100
@@ -165,58 +205,50 @@ executor:
 
 ---
 
-## 🧰 常用 CLI
+## 📂 项目结构
 
-| 命令 | 功能 |
-|---|---|
-| `arbor` | 启动交互式研究会话 |
-| `arbor --continue` | 继续上一段未完成的规划对话 |
-| `arbor replay --demo` | 回放内置示例运行，无需 API key |
-| `arbor report <session>` | 重新渲染某次会话的 REPORT |
-| `arbor idea-check "<想法>"` | 对照 alphaXiv 做新颖性 / 先行工作审查 |
-| `arbor web <session>` | 打开只读浏览器监控 |
-| `arbor --resume --run-name <name>` | 断点恢复一次运行 |
+```
+AutoAS/
+├── src/                  # autoas 包
+│   ├── core/             ReAct 循环、工具、LLM 提供方、上下文管理
+│   │   ├── agent.py      Executor ReAct 循环 + V2 收敛引擎
+│   │   └── context.py    上下文管理 + A4 增量 token 缓存
+│   ├── executor/         Executor 智能体 + executor CLI
+│   ├── coordinator/      Coordinator、Idea Tree、收敛检测器
+│   ├── cli/              autoas CLI：intake、仪表盘、setup、doctor
+│   ├── events/           类型化事件总线与载荷
+│   ├── report/           报告生成
+│   ├── webui/            只读运行监控 Web 服务器
+│   ├── plugins/          领域插件（mle_kaggle 等）
+│   └── skills/           按需加载的 Markdown 手册
+├── docs/                 文档（安装、配置、运行指南、组员报告要求）
+├── examples/             research_config 示例
+├── result/               各任务实验结果（REPORT.md / events.jsonl / submission）
+└── pyproject.toml        包定义 + autoas/arbor 双 CLI 入口
+```
 
 ---
 
-## 🗂️ 项目结构
+## 🗂️ 文档导航
 
-```
-src/                 # `arbor` 包
-├── core/            共享基础设施：ReAct 循环、工具、LLM 提供方、上下文管理
-│   ├── agent.py     执行器 ReAct 循环 + V2 收敛引擎（score-gated idle clock）
-│   └── context.py   上下文管理 + A4 增量 token 缓存
-├── executor/        Executor 智能体 + executor CLI
-├── coordinator/     Coordinator、Idea Tree、收敛检测器、orchestrator
-├── cli/             arbor CLI：intake、实时仪表盘、setup、doctor、config
-├── events/          类型化事件总线与载荷
-├── report/          报告生成
-├── webui/           只读运行监控 Web 服务器
-├── plugins/         领域插件（mle_kaggle 等）
-└── skills/          按需加载的 Markdown 手册
-result/              实验结果（V2 vs V1 对照，含完整 APTOS 记录）
-```
+| 文档 | 内容 |
+|---|---|
+| [`docs/installation.zh.md`](docs/installation.zh.md) | 安装与环境配置 |
+| [`docs/V2_MLE_LITE_RUN_GUIDE.md`](docs/V2_MLE_LITE_RUN_GUIDE.md) | MLE-Bench Lite 任务运行指南 |
+| [`docs/how-it-works.zh.md`](docs/how-it-works.zh.md) | 系统原理与三段式闭环详解 |
+| [`docs/组员报告要求.md`](docs/组员报告要求.md) | 实验报告写法与提交要求 |
+| [`docs/configuration.zh.md`](docs/configuration.zh.md) | 完整配置项说明 |
+| [`docs/web-ui.zh.md`](docs/web-ui.zh.md) | WebUI 使用指南 |
 
 ---
 
 ## 📚 致谢与引用
 
-本仓库构建于开源项目 **Arbor**（[RUC-NLPIR/Arbor](https://github.com/RUC-NLPIR/Arbor)）之上，并针对"任务规划 → 实验运行 → 数据分析 → 反馈迭代"的科研闭环做了 V2 优化（收敛引擎 + 增量 token 缓存）。Arbor 的 CLI 框架建立在开源项目 [claw-code](https://github.com/ultraworkers/claw-code) 之上。
+本项目构建于开源项目 **Arbor**（[RUC-NLPIR/Arbor](https://github.com/RUC-NLPIR/Arbor)，arXiv:2606.11926）之上，并在本项目中完成了面向 MLE-Bench 的插件化、收敛控制、token 效率优化、评测纪律、恢复机制、可视化和经验沉淀等扩展工程化改造。Arbor 的 CLI 框架建立在开源项目 [claw-code](https://github.com/ultraworkers/claw-code) 之上。
 
 基座模型使用 **Qwen 系列**，通过 **阿里云百炼（DashScope）** 调用。
 
-```bibtex
-@misc{jin2026arbor,
-  title  = {Toward Generalist Autonomous Research via Hypothesis-Tree Refinement},
-  author = {Jiajie Jin and Yuyang Hu and Kai Qiu and Qi Dai and Chong Luo and
-            Guanting Dong and Xiaoxi Li and Tong Zhao and Xiaolong Ma and
-            Gongrui Zhang and Zhirong Wu and Bei Liu and Zhengyuan Yang and
-            Linjie Li and Lijuan Wang and Hongjin Qian and Yutao Zhu and Zhicheng Dou},
-  year   = {2026},
-  eprint = {2606.11926},
-  archivePrefix = {arXiv}
-}
-```
+> ⚠️ **关于项目定位**：AutoAS 的 20 个 MLE-Bench 任务成绩均来自系统自动化运行产生的真实实验结果，不能简单归因于系统框架本身，也不能隐去未提升或未核验的任务。各任务实验材料（idea_tree、events.jsonl、REPORT.md、submission.csv）均可在 `result/` 目录审计复现。
 
 ---
 
