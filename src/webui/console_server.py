@@ -11,6 +11,7 @@ from __future__ import annotations
 import http.client
 import json
 import logging
+import os
 import secrets
 import threading
 import time
@@ -19,6 +20,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
+from ..cli.replay import demo_recording, load_recording
+from ..cli.tree_export import build_tree_html
 from .auth import ConsoleAuth, Principal
 from .manager import RunManager
 from .session_source import build_session_snapshot
@@ -29,6 +32,7 @@ log = logging.getLogger(__name__)
 _CONSOLE_HTML = Path(__file__).parent / "console.html"
 _RUN_HTML = Path(__file__).parent / "index.html"
 _MAX_JSON_BODY = 1024 * 1024
+_MAX_UPLOAD_BODY = 64 * 1024 * 1024
 
 
 class ControlConsoleServer:
@@ -107,11 +111,25 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
                 "ok": True,
                 "csrf_token": principal.csrf_token,
                 "workspace_root": str(self.console.manager.workspace_root),
+                "default_model": os.environ.get("ARBOR_DEFAULT_MODEL", "qwen3.8-max"),
+                "base_url": os.environ.get("OPENAI_BASE_URL", ""),
             })
             return
         if path == "/api/sessions":
             if self._require_auth():
                 self._serve_json(200, {"ok": True, "sessions": self.console.manager.list_sessions()})
+            return
+        if path == "/api/uploads":
+            if self._require_auth():
+                self._serve_json(200, {"ok": True, "uploads": self.console.manager.list_uploads()})
+            return
+        if path == "/replay/demo":
+            if not self._require_auth():
+                return
+            try:
+                self._serve_html(build_tree_html(demo_recording()))
+            except (OSError, ValueError, RuntimeError) as exc:
+                self._serve_json(500, {"ok": False, "error": f"demo replay unavailable: {exc}"})
             return
         session_id, suffix = self._session_route(path)
         if session_id is not None:
@@ -129,6 +147,9 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
                 return
             if suffix == "/events":
                 self._serve_session_events(session_id)
+                return
+            if suffix == "/replay":
+                self._serve_session_replay(session_id)
                 return
         self._serve_json(404, {"ok": False, "error": "not found"})
 
@@ -153,6 +174,19 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
             self._serve_json(201, {"ok": True, "run": job.as_dict()})
             return
 
+        if path == "/api/uploads":
+            try:
+                upload = self._read_upload()
+            except ValueError as exc:
+                self._serve_json(400, {"ok": False, "error": str(exc)})
+                return
+            except OSError as exc:
+                log.exception("failed to store dataset upload")
+                self._serve_json(500, {"ok": False, "error": f"upload failed: {type(exc).__name__}"})
+                return
+            self._serve_json(201, {"ok": True, "upload": upload})
+            return
+
         if path.startswith("/api/runs/") and path.endswith("/stop"):
             session_id = unquote(path[len("/api/runs/"):-len("/stop")]).strip("/")
             try:
@@ -168,6 +202,21 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
             self._proxy_input(session_id)
             return
         self._serve_json(404, {"ok": False, "error": "not found"})
+
+    def _serve_session_replay(self, session_id: str) -> None:
+        try:
+            session = self.console.manager.resolve_session(session_id)
+            if not session.is_dir():
+                raise ValueError("session does not exist")
+            html = build_tree_html(load_recording(session))
+        except (FileNotFoundError, ValueError) as exc:
+            self._serve_json(404, {"ok": False, "error": str(exc)})
+            return
+        except (OSError, RuntimeError) as exc:
+            log.exception("failed to build session replay")
+            self._serve_json(500, {"ok": False, "error": f"replay failed: {type(exc).__name__}"})
+            return
+        self._serve_html(html)
 
     def _serve_session_events(self, session_id: str) -> None:
         try:
@@ -308,6 +357,20 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
             raise ValueError("json body must be an object")
         return value
 
+    def _read_upload(self) -> dict[str, Any]:
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError as exc:
+            raise ValueError("invalid content length") from exc
+        if length <= 0:
+            raise ValueError("dataset file is empty")
+        if length > _MAX_UPLOAD_BODY:
+            raise ValueError("dataset file exceeds the 64 MiB limit")
+        filename = unquote(self.headers.get("X-Arbor-Filename") or "").strip()
+        if not filename:
+            raise ValueError("missing dataset filename")
+        return self.console.manager.save_upload(filename, self.rfile, length)
+
     @staticmethod
     def _session_route(path: str) -> tuple[str | None, str]:
         if not path.startswith("/session/"):
@@ -322,6 +385,15 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
         except OSError:
             self._serve_json(500, {"ok": False, "error": f"missing asset: {path.name}"})
             return
+        self.send_response(200)
+        self._security_headers()
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _serve_html(self, html: str) -> None:
+        body = html.encode("utf-8")
         self.send_response(200)
         self._security_headers()
         self.send_header("Content-Type", "text/html; charset=utf-8")

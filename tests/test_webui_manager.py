@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import os
 import stat
@@ -50,18 +51,29 @@ def test_start_run_uses_loopback_webui_and_does_not_persist_cloud_keys(
 
     monkeypatch.setenv("OPENAI_API_KEY", "must-not-be-written")
     manager = RunManager(tmp_path, popen_factory=fake_popen, port_allocator=lambda: 45678)
+    upload = manager.save_upload("train.csv", io.BytesIO(b"x,y\n1,2\n"), 8)
     job = manager.start_run({
         "project": "project",
         "run_name": "from_web",
         "prompt": "Improve the benchmark without changing its evaluator.",
         "interaction_mode": "collaborative",
         "max_cycles": 8,
+        "datasets": [upload["id"]],
+        "model": "qwen3.8-max",
+        "base_url": "https://example.test/compatible-mode/v1",
     })
 
     command = captured["command"]
     assert command[command.index("--webui-host") + 1] == "127.0.0.1"
     assert command[command.index("--interaction-mode") + 1] == "collaborative"
     assert command[command.index("--max-cycles") + 1] == "8"
+    assert "train.csv" in command[4]
+    assert "treat as read-only" in command[4]
+    runtime_config = Path(command[command.index("--config") + 1])
+    runtime_body = runtime_config.read_text(encoding="utf-8")
+    assert "qwen3.8-max" in runtime_body
+    assert "https://example.test/compatible-mode/v1" in runtime_body
+    assert "must-not-be-written" not in runtime_body
     control = job.session_dir / ".webui-control.json"
     body = control.read_text(encoding="utf-8")
     assert "must-not-be-written" not in body

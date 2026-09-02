@@ -11,14 +11,24 @@ import socket
 import subprocess
 import sys
 import threading
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, BinaryIO, Callable
+
+import yaml
 
 
 _RUN_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$")
+_MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./:-]{0,127}$")
 _CONTROL_FILE = ".webui-control.json"
+_UPLOAD_ROOT = Path(".arbor") / "uploads"
+_UPLOAD_ID_RE = re.compile(r"^[0-9a-f]{32}$")
+_ALLOWED_UPLOAD_SUFFIXES = {
+    ".csv", ".tsv", ".json", ".jsonl", ".parquet", ".xlsx", ".xls",
+    ".zip", ".tar", ".gz", ".tgz", ".txt",
+}
 _SCAN_SKIP = {".git", ".venv", "venv", "node_modules", "data", "__pycache__"}
 
 
@@ -166,6 +176,83 @@ class RunManager:
     def resolve_session(self, session_id: str) -> Path:
         return _decode_relative(session_id, self.workspace_root)
 
+    def save_upload(self, filename: str, source: BinaryIO, size: int) -> dict[str, Any]:
+        """Store one dataset upload below the workspace without exposing its bytes."""
+        clean_name = Path(filename).name.strip()
+        if not clean_name or clean_name in {".", ".."}:
+            raise ValueError("invalid upload filename")
+        if Path(clean_name).suffix.lower() not in _ALLOWED_UPLOAD_SUFFIXES:
+            raise ValueError("unsupported dataset file type")
+        if size <= 0:
+            raise ValueError("dataset file is empty")
+
+        upload_id = uuid.uuid4().hex
+        upload_dir = (self.workspace_root / _UPLOAD_ROOT / upload_id).resolve()
+        if not _inside(upload_dir, self.workspace_root):
+            raise ValueError("invalid upload path")
+        upload_dir.mkdir(parents=True, exist_ok=False)
+        target = upload_dir / clean_name
+        remaining = size
+        try:
+            with target.open("xb") as output:
+                while remaining:
+                    chunk = source.read(min(1024 * 1024, remaining))
+                    if not chunk:
+                        raise ValueError("upload ended before declared content length")
+                    output.write(chunk)
+                    remaining -= len(chunk)
+            metadata = {
+                "id": upload_id,
+                "name": clean_name,
+                "size": size,
+                "path": str(target.relative_to(self.workspace_root)),
+                "created_at": _utc_now(),
+            }
+            (upload_dir / "meta.json").write_text(
+                json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            return metadata
+        except Exception:
+            try:
+                target.unlink(missing_ok=True)
+                (upload_dir / "meta.json").unlink(missing_ok=True)
+                upload_dir.rmdir()
+            except OSError:
+                pass
+            raise
+
+    def list_uploads(self) -> list[dict[str, Any]]:
+        root = self.workspace_root / _UPLOAD_ROOT
+        if not root.is_dir():
+            return []
+        uploads: list[dict[str, Any]] = []
+        for item in root.iterdir():
+            if not item.is_dir() or not _UPLOAD_ID_RE.fullmatch(item.name):
+                continue
+            try:
+                meta = json.loads((item / "meta.json").read_text(encoding="utf-8"))
+                if isinstance(meta, dict) and self.resolve_upload(item.name).is_file():
+                    uploads.append(meta)
+            except (OSError, ValueError, json.JSONDecodeError):
+                continue
+        return sorted(uploads, key=lambda row: str(row.get("created_at") or ""), reverse=True)
+
+    def resolve_upload(self, upload_id: str) -> Path:
+        if not _UPLOAD_ID_RE.fullmatch(upload_id):
+            raise ValueError("invalid dataset upload id")
+        upload_dir = (self.workspace_root / _UPLOAD_ROOT / upload_id).resolve()
+        if not _inside(upload_dir, self.workspace_root):
+            raise ValueError("dataset upload escapes workspace root")
+        try:
+            meta = json.loads((upload_dir / "meta.json").read_text(encoding="utf-8"))
+            name = Path(str(meta["name"])).name
+        except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+            raise ValueError("dataset upload does not exist") from exc
+        target = (upload_dir / name).resolve()
+        if not _inside(target, upload_dir) or not target.is_file():
+            raise ValueError("dataset upload does not exist")
+        return target
+
     def start_run(self, payload: dict[str, Any]) -> ManagedRun:
         project = self.validate_project(str(payload.get("project") or "."))
         prompt = str(payload.get("prompt") or "").strip()
@@ -173,6 +260,16 @@ class RunManager:
             raise ValueError("prompt is required")
         if len(prompt) > 32_768:
             raise ValueError("prompt is too long")
+
+        dataset_ids = payload.get("datasets") or []
+        if not isinstance(dataset_ids, list) or len(dataset_ids) > 20:
+            raise ValueError("datasets must be a list of at most 20 uploads")
+        dataset_paths = [self.resolve_upload(str(upload_id)) for upload_id in dataset_ids]
+        if dataset_paths:
+            dataset_note = "\n\nUploaded dataset inputs (treat as read-only):\n" + "\n".join(
+                f"- {path}" for path in dataset_paths
+            )
+            prompt += dataset_note
 
         requested = str(payload.get("run_name") or "").strip()
         run_name = requested or f"web_{datetime.now():%Y%m%d_%H%M%S}"
@@ -193,6 +290,23 @@ class RunManager:
             config_path = (project / candidate).resolve() if not candidate.is_absolute() else candidate.resolve()
             if not config_path.is_file() or not _inside(config_path, project):
                 raise ValueError("config file must exist inside the selected project")
+
+        model = str(payload.get("model") or "").strip()
+        if model:
+            if config_path is not None:
+                raise ValueError("choose either a config file or a model override, not both")
+            if not _MODEL_RE.fullmatch(model):
+                raise ValueError("invalid model name")
+            base_url = str(payload.get("base_url") or os.environ.get("OPENAI_BASE_URL") or "").strip()
+            if base_url and not base_url.startswith(("https://", "http://")):
+                raise ValueError("base_url must start with http:// or https://")
+            llm_config: dict[str, Any] = {"provider": "auto", "model": model}
+            if base_url:
+                llm_config["base_url"] = base_url
+            config_path = session_dir / "web_run_config.yaml"
+            config_path.write_text(
+                yaml.safe_dump({"llm": llm_config}, sort_keys=False), encoding="utf-8"
+            )
 
         mode = str(payload.get("interaction_mode") or "review").strip().lower()
         if mode not in {"auto", "direction", "review", "collaborative"}:
@@ -329,6 +443,7 @@ class RunManager:
             base.update(job.as_dict())
             base.setdefault("task", self._read_run_info(job.session_dir).get("task", ""))
             base.setdefault("model", self._read_run_info(job.session_dir).get("model", ""))
+            base["replay_available"] = (job.session_dir / "events.jsonl").is_file()
             records[job.session_id] = base
         return sorted(
             records.values(),
@@ -357,7 +472,12 @@ class RunManager:
         info = self._read_run_info(session)
         job = self.get_job(session_id)
         if job is not None:
-            return {**info, **job.as_dict(), "updated_at": self._mtime(session)}
+            return {
+                **info,
+                **job.as_dict(),
+                "updated_at": self._mtime(session),
+                "replay_available": (session / "events.jsonl").is_file(),
+            }
         return {
             "id": session_id,
             "run_name": str(info.get("run_name") or session.name),
@@ -367,6 +487,7 @@ class RunManager:
             "model": str(info.get("model") or ""),
             "status": "history",
             "interactive": False,
+            "replay_available": (session / "events.jsonl").is_file(),
             "updated_at": self._mtime(session),
         }
 

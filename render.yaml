@@ -10,8 +10,9 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: ARBOR_DEFAULT_MODEL
+        value: "qwen3.8-max"
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_BASE_URL
         sync: false
-

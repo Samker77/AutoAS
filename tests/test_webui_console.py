@@ -18,11 +18,13 @@ def test_console_html_exposes_open_interactive_controls() -> None:
         encoding="utf-8"
     )
     for marker in (
-        "Arbor Experiment Dashboard",
+        "实验任务操作台",
         "Arbor AI Assistant",
         "ASK 询问",
         "STEER 干预",
-        "创建并启动",
+        "确认并启动任务",
+        "上传实验数据",
+        "实验回放",
         'data-gate="approve"',
     ):
         assert marker in html
@@ -33,20 +35,22 @@ class _Client:
         self.port = port
         self.cookie = ""
 
-    def request(self, path: str, *, method: str = "GET", body: dict | None = None,
-                csrf: str = "") -> tuple[int, dict | str, object]:
-        headers: dict[str, str] = {}
+    def request(self, path: str, *, method: str = "GET", body: dict | bytes | None = None,
+                csrf: str = "", headers: dict[str, str] | None = None) -> tuple[int, dict | str, object]:
+        request_headers: dict[str, str] = dict(headers or {})
         raw = None
-        if body is not None:
+        if isinstance(body, dict):
             raw = json.dumps(body).encode("utf-8")
-            headers["Content-Type"] = "application/json"
+            request_headers["Content-Type"] = "application/json"
+        elif isinstance(body, bytes):
+            raw = body
         if csrf:
-            headers["X-Arbor-CSRF"] = csrf
+            request_headers["X-Arbor-CSRF"] = csrf
         if self.cookie:
-            headers["Cookie"] = self.cookie
+            request_headers["Cookie"] = self.cookie
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
         try:
-            connection.request(method, path, body=raw, headers=headers)
+            connection.request(method, path, body=raw, headers=request_headers)
             response = connection.getresponse()
             payload = response.read().decode("utf-8")
             response_headers = response.headers
@@ -161,3 +165,46 @@ def test_console_proxies_interactive_input_with_the_internal_run_token(tmp_path:
         console.stop()
         child.shutdown()
         child.server_close()
+
+
+def test_console_uploads_dataset_and_serves_session_replay(tmp_path: Path) -> None:
+    session = tmp_path / "project" / ".arbor" / "sessions" / "history"
+    session.mkdir(parents=True)
+    (session / "events.jsonl").write_text(
+        json.dumps({
+            "ts": 1.0,
+            "type": "session.start",
+            "data": {"task": "demo task", "model": "demo-model"},
+        }) + "\n",
+        encoding="utf-8",
+    )
+    manager = RunManager(tmp_path)
+    console = ControlConsoleServer(manager, ConsoleAuth(secret=b"c" * 32), port=0)
+    assert console.start()
+    client = _Client(console.port)
+    try:
+        _, identity, _ = client.request("/api/me")
+        csrf = identity["csrf_token"]
+        code, body, _ = client.request(
+            "/api/uploads",
+            method="POST",
+            body=b"feature,target\n1,2\n",
+            csrf=csrf,
+            headers={
+                "Content-Type": "application/octet-stream",
+                "X-Arbor-Filename": "sample.csv",
+            },
+        )
+        assert code == 201
+        assert body["upload"]["name"] == "sample.csv"
+
+        code, body, _ = client.request("/api/uploads")
+        assert code == 200 and body["uploads"][0]["size"] == 19
+
+        session_id = manager.session_id(session)
+        code, page, headers = client.request(f"/session/{session_id}/replay")
+        assert code == 200
+        assert "demo task" in page and "demo-model" in page
+        assert "text/html" in headers.get("Content-Type", "")
+    finally:
+        console.stop()
