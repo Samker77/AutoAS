@@ -227,7 +227,8 @@ search:
 arbor run --max-cycles 20 --mode review --no-webui
 ```
 
-常用的有：`--max-cycles N`、`--max-turns N`、`--mode MODE`、`--webui-port N`、`--no-webui`。
+常用的有：`--max-cycles N`、`--max-turns N`、`--mode MODE`、`--webui-port N`、
+`--webui-host HOST`、`--no-webui`。
 完整列表见 [CLI 参考](cli.md#arbor-run)。
 
 ### 5. 在对话里：为本次运行挑一个插件或技能
@@ -274,6 +275,7 @@ executor 超时与总时间预算归入一个名字下（例如 `mle_bench_lite`
 | --- | --- |
 | `interaction_mode` | `auto`、`direction`、`review` 或 `collaborative`。见[交互模式](interaction-modes.md)。用 `--mode` 覆盖。 |
 | `webui_port` | 浏览器监控的端口（默认 `8765`）。见 [Web UI 与监控](web-ui.md)。用 `--webui-port` 覆盖；用 `--no-webui` 关闭。 |
+| `webui_host` | 单次运行 WebUI 的监听地址（默认 `127.0.0.1`）。远程访问优先使用 `arbor serve` 控制台，并在公网代理层限制访问。 |
 
 ### 领域对准
 

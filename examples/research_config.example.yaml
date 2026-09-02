@@ -41,6 +41,7 @@ timeout:                  # `timeout:` IS a real nested group
 ui:
   interaction_mode: auto  # auto | direction | review | collaborative
   # webui_port: 8765       # set to expose the read-only WebUI
+  # webui_host: 127.0.0.1  # keep loopback; use `arbor serve` for authenticated remote access
 
 # Literature search / idea novelty checks (optional). Zero-config: queries the
 # public alphaXiv API in-process — no search endpoint, no key. The backend

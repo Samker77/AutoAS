@@ -14,6 +14,7 @@ complete reference.
 | `arbor doctor` | Diagnose your environment (PATH, Python, git, API keys). |
 | `arbor report` | Work with a finished run's report. |
 | `arbor idea-check` | Novelty / prior-art check for a single idea against the public alphaXiv API. |
+| `arbor serve` | Start the authenticated remote experiment and Session console. |
 | `arbor version` | Print the installed version. |
 
 !!! tip
@@ -59,6 +60,7 @@ changing eval or data"`). Omit it to start with the intake chat.
 | `--followup / --no-followup` | After `REPORT.md`, open a read-only Q&A prompt about the finished run (default on). |
 | `--verbose-preflight` | Print successful preflight checks too (default shows only failures/warnings). |
 | `--webui-port N` | Read-only browser monitor port. Default auto-starts near `8765` for interactive runs. |
+| `--webui-host HOST` | Per-run WebUI bind address (default `127.0.0.1`). Prefer `arbor serve` for remote access. |
 | `--no-webui` | Do not start the read-only browser monitor. |
 | `--interaction-mode, --mode MODE` | Human-in-loop mode: `auto`, `direction`, `review`, `collaborative`. |
 | `--allow-non-base-branch` | Allow starting from the current non-`main` branch. Useful for dev, risky for benchmarks. |
@@ -83,6 +85,27 @@ arbor run --mode review
 # Resume an interrupted session
 arbor run --resume --run-name my-study
 ```
+
+## `arbor serve`
+
+```bash
+arbor serve [OPTIONS]
+```
+
+Starts a no-login remote console that can create/stop runs, select historical
+Sessions, and proxy Ask, Steer, and review approvals to a live run. Important options:
+
+| Option | Description |
+| --- | --- |
+| `--workspace-root PATH` | Restrict manageable projects and Sessions to this directory. |
+| `--host HOST` | Bind address; use `0.0.0.0` for remote access. |
+| `--port N` | Console port (default `8765`). |
+| `--session-ttl SECONDS` | Anonymous browser-session lifetime (default eight hours). |
+| `--secure-cookie` | Make the browser-session cookie HTTPS-only; use behind an HTTPS reverse proxy. |
+| `--no-open` | Do not open a local browser. |
+
+Anyone who knows the URL can control experiments. Restrict public access at the reverse proxy,
+firewall, VPN, or tunnel layer. See [Web UI & Monitoring](web-ui.md#no-login-remote-experiment-console).
 
 ## Interactive slash commands
 

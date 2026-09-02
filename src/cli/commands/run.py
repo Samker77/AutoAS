@@ -84,6 +84,10 @@ def run_command(
         None, "--webui-port",
         help=f"Read-only browser monitor port. Default auto-starts near {DEFAULT_WEBUI_PORT} for interactive runs.",
     ),
+    webui_host: str | None = typer.Option(
+        None, "--webui-host",
+        help="WebUI bind address. Defaults to 127.0.0.1; prefer `arbor serve` for remote access.",
+    ),
     no_webui: bool = typer.Option(
         False, "--no-webui",
         help="Do not start the read-only browser monitor.",
@@ -402,6 +406,8 @@ def run_command(
             raise typer.Exit(code=1)
     if webui_port is not None:
         config.ui.webui_port = webui_port
+    if webui_host is not None:
+        config.ui.webui_host = webui_host
     requested_interaction = _resolve_requested_interaction_mode(
         interaction_mode=interaction_mode,
     )
@@ -533,7 +539,9 @@ def run_command(
             webui = start_webui(run_state, bus, preferred=preferred,
                                 auto=auto, scan=WEBUI_PORT_SCAN,
                                 companion=companion,
-                                enable_input=not no_dashboard_input)
+                                enable_input=not no_dashboard_input,
+                                host=config.ui.webui_host,
+                                token=os.environ.get("ARBOR_WEBUI_TOKEN"))
             if webui is not None:
                 run_state.set_webui_url(webui.browser_url)
                 if webui.interactive:

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Arbor Scientist · 交互实验台</title>
+  <style>
+    :root{
+      --page:#f7f9fc;--canvas:#dcecff;--card:#fff;--soft:#f5f8fc;--line:#e5ebf3;
+      --ink:#172033;--muted:#8490a4;--blue:#356ce8;--blue2:#7ea9ff;--blue3:#eaf1ff;
+      --green:#27b78d;--red:#ef6b73;--amber:#eabf55;--shadow:0 24px 70px rgba(42,73,127,.17)
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:var(--page);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    button,input,textarea,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+    .topbar{height:72px;padding:0 4vw;display:flex;align-items:center;gap:28px;background:#fff;border-bottom:1px solid #edf0f5;position:sticky;top:0;z-index:20}
+    .brand{display:flex;align-items:center;gap:10px;min-width:max-content;font-weight:800;font-size:19px;letter-spacing:-.03em}.brand-mark{width:31px;height:31px;border-radius:9px;position:relative;background:var(--blue);box-shadow:0 8px 18px rgba(53,108,232,.25)}.brand-mark:before,.brand-mark:after{content:"";position:absolute;background:#fff;border-radius:2px}.brand-mark:before{width:17px;height:5px;left:7px;top:13px}.brand-mark:after{width:5px;height:17px;left:13px;top:7px}
+    .search{height:40px;max-width:430px;flex:1;position:relative}.search svg{position:absolute;left:14px;top:12px;width:17px;height:17px;color:#a8b1c1}.search input{width:100%;height:100%;border:0;background:#f3f5f9;border-radius:22px;padding:0 42px;color:var(--ink);outline:0}.search input:focus{box-shadow:0 0 0 3px var(--blue3)}
+    .toplinks{display:flex;gap:24px;margin-left:auto;color:#4e586b;font-size:13px;font-weight:650}.toplinks button{border:0;background:transparent;color:inherit;padding:8px}.top-action{height:39px;padding:0 17px;border:1px solid #dfe5ee;border-radius:20px;background:#fff;color:var(--ink);font-weight:700;display:flex;align-items:center;gap:8px}.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#3b8c82;color:#fff;font-weight:800;box-shadow:inset 0 0 0 4px rgba(255,255,255,.28)}
+    .hero{max-width:1180px;margin:26px auto 42px;padding:42px;background:linear-gradient(135deg,#dcecff 0%,#cfe3fb 100%);border-radius:12px;min-height:730px}
+    .dashboard{height:646px;background:#fff;border:6px solid rgba(255,255,255,.72);border-radius:25px;box-shadow:var(--shadow);display:grid;grid-template-columns:62px minmax(0,1fr) 325px;overflow:hidden}
+    .rail{border-right:1px solid var(--line);padding:24px 10px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;background:#fff}.rail-logo{width:37px;height:37px;border-radius:11px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:29px;font-weight:300;margin-bottom:20px}.rail-btn{width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:#6d798d;display:grid;place-items:center;transition:.2s}.rail-btn svg{width:18px;height:18px}.rail-btn:hover,.rail-btn.active{background:var(--blue3);color:var(--blue)}.rail-spacer{flex:1}.rail-dot{position:relative}.rail-dot:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:var(--red);right:3px;top:2px;border:2px solid #fff}
+    .main{min-width:0;display:flex;flex-direction:column;padding:25px 24px 20px;overflow:hidden}.main-head{height:42px;display:flex;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px}.title h1{font-size:20px;line-height:1;margin:0;font-weight:800;letter-spacing:-.03em}.title p{font-size:10px;color:var(--blue);margin:7px 0 0;font-weight:700}.main-actions{margin-left:auto;display:flex;gap:9px}.pill{height:30px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 11px;color:#657186;font-size:11px;font-weight:650;display:flex;align-items:center;gap:7px}.pill svg{width:14px;height:14px}.pill.primary{color:#fff;background:var(--blue);border-color:var(--blue);box-shadow:0 8px 16px rgba(53,108,232,.2)}
+    .chart-card{padding:18px 12px 4px;height:216px}.section-row{display:flex;align-items:center}.eyebrow{font-size:10px;color:#9aa4b5;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.metric{font-size:25px;font-weight:800;letter-spacing:-.045em;margin-top:4px}.metric small{font-size:11px;color:#6f7b8d;font-weight:500;letter-spacing:0}.health-badge{margin-left:8px;color:var(--green);font-size:10px;font-weight:700}.range{margin-left:auto;display:flex;background:var(--soft);padding:3px;border-radius:9px}.range button{border:0;background:transparent;color:#9aa4b5;font-size:9px;padding:5px 7px;border-radius:6px}.range button.active{background:#fff;color:#526077;box-shadow:0 2px 7px rgba(43,64,98,.1)}
+    .chart{height:125px;margin-top:5px;position:relative}.chart svg{width:100%;height:100%;overflow:visible}.gridline{stroke:#edf1f6;stroke-width:1}.chart-path{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.chart-fill{fill:url(#chartFade)}.chart-dot{fill:#fff;stroke:var(--blue);stroke-width:2}.chart-labels{position:absolute;left:0;right:0;bottom:-1px;display:flex;justify-content:space-between;color:#a5afbe;font-size:8px}
+    .session-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;flex:1;min-height:0}.session-head,.session-row{display:grid;grid-template-columns:minmax(150px,1.25fr) 84px minmax(90px,.8fr) 112px;align-items:center;column-gap:9px}.session-head{height:38px;padding:0 13px;background:#fbfcfe;color:#8d98a9;font-size:9px;font-weight:700}.session-scroll{height:calc(100% - 38px);overflow:auto}.session-row{min-height:50px;padding:8px 13px;border-top:1px solid var(--line);font-size:10px;transition:.15s}.session-row:hover{background:#f9fbff}.session-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.session-task{font-size:8px;color:#9aa4b5;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.status{font-size:9px;font-weight:750;padding:4px 7px;border-radius:7px;display:inline-block;width:max-content}.status.running,.status.starting{background:#edf5ff;color:var(--blue)}.status.completed,.status.history{background:#ecfaf5;color:var(--green)}.status.failed,.status.stopped{background:#fff0f1;color:var(--red)}.progress{height:5px;border-radius:5px;background:#edf1f6;overflow:hidden}.progress span{display:block;height:100%;border-radius:inherit;background:var(--blue)}.score{font-size:9px;color:#6e798c;margin-bottom:5px}.row-actions{display:flex;justify-content:flex-end;gap:4px}.mini{height:27px;border:0;background:transparent;color:var(--blue);font-size:9px;font-weight:700;padding:0 6px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center}.mini:hover{background:var(--blue3)}.mini.stop{color:var(--red)}.empty{height:100%;min-height:130px;display:grid;place-items:center;color:#9aa4b5;font-size:11px;text-align:center;padding:20px}
+    .assistant{border-left:1px solid var(--line);background:#fbfcff;padding:20px 16px 14px;display:flex;flex-direction:column;min-width:0}.assistant-head{display:flex;align-items:center;gap:9px;padding-bottom:13px;border-bottom:1px solid var(--line)}.bot{width:29px;height:29px;border-radius:9px;background:var(--blue3);color:var(--blue);display:grid;place-items:center}.bot svg{width:16px;height:16px}.assistant-head h2{font-size:12px;margin:0;font-weight:800}.assistant-head p{font-size:8px;margin:2px 0 0;color:#9ba5b5}.session-pick{margin-left:auto;max-width:122px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 7px;color:#667387;font-size:8px;outline:0}
+    .messages{flex:1;overflow:auto;padding:14px 2px 8px;display:flex;flex-direction:column;gap:10px}.bubble-row{display:flex;gap:7px;align-items:flex-end}.bubble-row.user{justify-content:flex-end}.bubble{max-width:84%;font-size:9.5px;line-height:1.55;padding:9px 11px;border-radius:11px;background:#fff;border:1px solid var(--line);color:#536074;white-space:pre-wrap;overflow-wrap:anywhere}.bubble-row.user .bubble{background:var(--blue);border-color:var(--blue);color:#fff;border-bottom-right-radius:4px}.bubble-row.agent .bubble{border-bottom-left-radius:4px}.bubble-time{font-size:7px;color:#a5afbd;margin-top:3px}.system-card{border:1px solid #e2e9f5;border-radius:11px;background:#fff;padding:10px}.system-title{display:flex;align-items:center;gap:7px;color:#68758a;font-size:9px;font-weight:800}.system-title span{width:18px;height:18px;border-radius:6px;background:var(--blue3);color:var(--blue);display:grid;place-items:center}.system-card p{font-size:8.5px;color:#7f8a9c;line-height:1.45;margin:7px 0}.approval-actions{display:flex;flex-wrap:wrap;gap:5px}.approval-actions button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 8px;font-size:8px;color:#68758a}.approval-actions button.approve{color:#fff;background:var(--blue);border-color:var(--blue)}.gate-feedback{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:7px;padding:7px;font-size:8.5px;outline:0}
+    .composer{border:1px solid #dfe6f1;background:#fff;border-radius:12px;padding:7px}.mode-switch{display:flex;gap:4px;margin-bottom:6px}.mode-switch button{border:0;background:#f3f6fa;color:#8792a4;border-radius:6px;padding:4px 8px;font-size:8px;font-weight:700}.mode-switch button.active{background:var(--blue3);color:var(--blue)}.compose-row{display:flex;gap:7px;align-items:flex-end}.compose-row textarea{border:0;outline:0;resize:none;min-height:31px;max-height:75px;flex:1;padding:7px 5px;color:#536074;font-size:9px}.send{width:31px;height:31px;border-radius:50%;border:1px solid var(--blue2);background:#fff;color:var(--blue);display:grid;place-items:center}.send svg{width:14px;height:14px}.send:disabled{opacity:.35;cursor:not-allowed}.assistant-note{text-align:center;color:#a5afbd;font-size:7px;margin-top:6px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(25,38,60,.35);backdrop-filter:blur(7px);z-index:50;display:grid;place-items:center;padding:20px}.modal{width:min(650px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 34px 90px rgba(22,42,78,.28);padding:24px}.modal-head{display:flex;align-items:flex-start;margin-bottom:20px}.modal h2{margin:0;font-size:19px}.modal-head p{margin:5px 0 0;color:var(--muted);font-size:11px}.close{margin-left:auto;width:34px;height:34px;border:0;border-radius:50%;background:var(--soft);color:#778398;font-size:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.fg{margin-bottom:13px}.fg.full{grid-column:1/-1}.fg label{display:block;font-size:10px;font-weight:700;color:#718096;margin-bottom:6px}.field{width:100%;border:1px solid #dfe6ef;border-radius:10px;background:#fbfcfe;padding:10px 11px;color:var(--ink);outline:0}.field:focus{border-color:var(--blue2);box-shadow:0 0 0 3px var(--blue3)}textarea.field{min-height:112px;resize:vertical}.check{display:flex;gap:8px;align-items:center;color:#7f8a9c;font-size:10px}.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-top:7px}.btn{height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#657186;padding:0 15px;font-weight:700}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.form-msg{margin-right:auto;font-size:10px;color:var(--muted)}.form-msg.error{color:var(--red)}.form-msg.ok{color:var(--green)}
+    .toast{position:fixed;right:24px;bottom:24px;z-index:80;background:#172033;color:#fff;border-radius:10px;padding:11px 15px;font-size:11px;box-shadow:0 15px 35px rgba(20,32,54,.25)}
+    @media(max-width:1050px){.hero{margin:18px;padding:22px}.dashboard{grid-template-columns:58px minmax(0,1fr) 285px}.toplinks{display:none}}
+    @media(max-width:820px){.topbar{padding:0 16px}.search{display:none}.hero{margin:0;padding:10px;border-radius:0}.dashboard{height:auto;min-height:calc(100vh - 92px);grid-template-columns:52px 1fr}.assistant{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);min-height:480px}.main{min-height:650px}.form-grid{grid-template-columns:1fr}.fg.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v6l-5.5 9a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3M7 15h10"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 6v6M5 17v-2a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L14.3 3h-4.6l-.4 3a8 8 0 0 0-1.7 1L5 6 3 9.4 5.1 11a7 7 0 0 0 0 2L3 14.6 5 18l2.6-1a8 8 0 0 0 1.7 1l.4 3h4.6l.4-3a8 8 0 0 0 1.7-1l2.6 1 2-3.4-2.1-1.6a7 7 0 0 0 .1-1Z"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 3v4M8 12h.01M16 12h.01M8 16h8"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M7 8a7 7 0 0 1 12 4M17 16A7 7 0 0 1 5 12"/></symbol>
+  </defs></svg>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"></span>Arbor Scientist</div>
+    <label class="search"><svg><use href="#i-search"/></svg><input id="searchInput" placeholder="搜索实验或 Session…" /></label>
+    <nav class="toplinks"><button data-scroll="dashboard">总览</button><button data-scroll="sessions">实验记录</button><button id="docsBtn">使用说明</button></nav>
+    <button class="top-action" id="newTop"><svg width="15" height="15"><use href="#i-plus"/></svg>新建实验</button>
+    <div class="avatar" title="免登录访问">A</div>
+  </header>
+
+  <main class="hero" id="dashboard">
+    <section class="dashboard">
+      <aside class="rail" aria-label="主导航">
+        <div class="rail-logo">+</div>
+        <button class="rail-btn active" title="实验总览" data-scroll="dashboard"><svg><use href="#i-grid"/></svg></button>
+        <button class="rail-btn" title="新建实验" id="newRail"><svg><use href="#i-flask"/></svg></button>
+        <button class="rail-btn" title="历史 Session" data-scroll="sessions"><svg><use href="#i-clock"/></svg></button>
+        <button class="rail-btn" title="实验树" id="treeBtn"><svg><use href="#i-tree"/></svg></button>
+        <div class="rail-spacer"></div>
+        <button class="rail-btn rail-dot" title="运行状态" id="statusBtn"><svg><use href="#i-bot"/></svg></button>
+        <button class="rail-btn" title="设置" id="settingsBtn"><svg><use href="#i-settings"/></svg></button>
+      </aside>
+
+      <section class="main">
+        <header class="main-head">
+          <div class="title"><h1>Arbor Experiment Dashboard</h1><p>OPEN INTERACTIVE RESEARCH CONSOLE</p></div>
+          <div class="main-actions">
+            <button class="pill" id="refreshBtn"><svg><use href="#i-refresh"/></svg>刷新</button>
+            <button class="pill primary" id="newMain"><svg><use href="#i-plus"/></svg>创建实验</button>
+          </div>
+        </header>
+
+        <section class="chart-card" aria-label="实验活跃趋势">
+          <div class="section-row">
+            <div><div class="eyebrow">实验活跃趋势</div><div class="metric"><span id="healthScore">0</span><small> Sessions</small><span class="health-badge" id="healthLabel">尚未运行</span></div></div>
+            <div class="range"><button>1d</button><button>1w</button><button class="active">All time</button></div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 640 126" preserveAspectRatio="none" role="img" aria-label="Session health trend">
+              <defs><linearGradient id="chartFade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7ea9ff" stop-opacity=".25"/><stop offset="1" stop-color="#7ea9ff" stop-opacity="0"/></linearGradient></defs>
+              <path class="gridline" d="M0 18H640M0 51H640M0 84H640M0 117H640"/>
+              <path id="chartFill" class="chart-fill" d="M0 98 L640 98 L640 117 L0 117Z"/>
+              <path id="chartPath" class="chart-path" d="M0 98 L640 98"/>
+              <g id="chartDots"></g>
+            </svg>
+            <div class="chart-labels" id="chartLabels"><span>暂无数据</span><span>现在</span></div>
+          </div>
+        </section>
+
+        <section class="session-card" id="sessions">
+          <div class="session-head"><span>SESSION / 任务</span><span>状态</span><span>运行概览</span><span style="text-align:right">操作</span></div>
+          <div class="session-scroll" id="sessionRows"><div class="empty">正在读取 Session…</div></div>
+        </section>
+      </section>
+
+      <aside class="assistant">
+        <header class="assistant-head">
+          <div class="bot"><svg><use href="#i-bot"/></svg></div>
+          <div><h2>Arbor AI Assistant</h2><p>Ask · Steer · Approve</p></div>
+          <select class="session-pick" id="liveSession" aria-label="选择运行中实验"><option value="">无运行实验</option></select>
+        </header>
+        <div class="messages" id="messages">
+          <div class="bubble-row agent"><div class="bot"><svg><use href="#i-bot"/></svg></div><div><div class="bubble">你好，我是 Arbor 实验助手。启动一个交互实验后，可以在这里提问、调整方向或审批实验节点。</div></div></div>
+        </div>
+        <div class="composer">
+          <div class="mode-switch"><button class="active" data-mode="ask">ASK 询问</button><button data-mode="steer">STEER 干预</button></div>
+          <div class="compose-row"><textarea id="assistantInput" placeholder="选择运行中实验后输入…" disabled></textarea><button class="send" id="sendBtn" disabled title="发送"><svg><use href="#i-send"/></svg></button></div>
+        </div>
+        <div class="assistant-note">指令将实时发送到当前 Arbor Session</div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal-backdrop hidden" id="runModal" role="dialog" aria-modal="true" aria-labelledby="runModalTitle">
+    <form class="modal" id="runForm">
+      <div class="modal-head"><div><h2 id="runModalTitle">创建新实验</h2><p>配置研究目标、交互模式与 Session 运行参数。</p></div><button class="close" type="button" id="closeModal">×</button></div>
+      <div class="form-grid">
+        <div class="fg"><label for="project">项目目录</label><input id="project" class="field" value="." required /></div>
+        <div class="fg"><label for="runName">Session 名称</label><input id="runName" class="field" placeholder="留空自动生成" /></div>
+        <div class="fg"><label for="config">配置文件（可选）</label><input id="config" class="field" placeholder="research_config.yaml" /></div>
+        <div class="fg"><label for="mode">交互模式</label><select id="mode" class="field"><option value="review">Review：审批实验想法</option><option value="collaborative">Collaborative：方向+审批</option><option value="direction">Direction：提供方向</option><option value="auto">Auto：自动运行</option></select></div>
+        <div class="fg"><label for="cycles">Max cycles（可选）</label><input id="cycles" class="field" type="number" min="1" max="10000" /></div>
+        <div class="fg full"><label for="prompt">研究目标 / Prompt</label><textarea id="prompt" class="field" required placeholder="例如：在不修改评测脚本和数据的前提下优化验证集指标，并输出有效结果。"></textarea></div>
+        <label class="check fg full"><input id="allowBranch" type="checkbox" />允许从非主分支启动（仅在理解风险后勾选）</label>
+      </div>
+      <div class="modal-foot"><span class="form-msg" id="runMessage">启动后可在右侧 Ask、Steer 并处理节点审批。</span><button class="btn" type="button" id="cancelModal">取消</button><button class="btn primary" id="startBtn" type="submit">创建并启动</button></div>
+    </form>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+  <script>
+    'use strict';
+    const $=id=>document.getElementById(id);
+    let csrf='', sessions=[], query='', selectedId='', interactionMode='ask', source=null, latestSnapshot=null, refreshTimer=null;
+    const liveStatuses=new Set(['starting','running']);
+    const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const svg=id=>`<svg width="13" height="13"><use href="#${id}"/></svg>`;
+    function toast(text){const el=$('toast');el.textContent=text;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),3000)}
+    async function api(path,opt={}){const method=opt.method||'GET',headers={...(opt.headers||{})};if(method!=='GET')headers['X-Arbor-CSRF']=csrf;const r=await fetch(path,{credentials:'same-origin',...opt,method,headers});let data={};try{data=await r.json()}catch(e){}if(r.status===401)throw new Error('访问会话已失效，请刷新页面');if(!r.ok)throw new Error(data.error||`请求失败（${r.status}）`);return data}
+    const statusLabel=s=>({running:'运行中',starting:'启动中',completed:'已完成',history:'历史',failed:'失败',stopped:'已停止'}[s]||s||'未知');
+    const when=s=>{if(!s)return '时间未知';const d=new Date(s);return isNaN(d)?s:d.toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})};
+    function activityFor(s){if(s.status==='completed'||s.status==='history')return 100;if(s.status==='running')return 72;if(s.status==='starting')return 28;if(s.status==='stopped')return 42;return 16}
+    function activityLabel(s){if(s.status==='completed'||s.status==='history')return '记录完整';if(s.status==='running')return '持续执行';if(s.status==='starting')return '正在初始化';if(s.status==='stopped')return '已人工停止';return '需要检查'}
+    async function boot(){try{const me=await api('/api/me');csrf=me.csrf_token;await loadSessions();refreshTimer=setInterval(loadSessions,5000)}catch(e){$('sessionRows').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
+    async function loadSessions(){try{const data=await api('/api/sessions');sessions=data.sessions||[];renderAll()}catch(e){$('sessionRows').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
+    function renderAll(){renderStats();renderSessions();renderLivePicker()}
+    function renderStats(){const active=sessions.filter(s=>liveStatuses.has(s.status)).length;$('healthScore').textContent=sessions.length;$('healthLabel').textContent=active?`${active} 个正在运行`:'当前稳定';const points=sessions.slice(0,10).reverse();const values=points.map(activityFor);if(!values.length)values.push(35,35);const w=640,h=108,step=w/Math.max(1,values.length-1);const coords=values.map((v,i)=>[i*step,h-v*.85]);const d=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');$('chartPath').setAttribute('d',d);$('chartFill').setAttribute('d',`${d} L${w} 117 L0 117Z`);$('chartDots').innerHTML=coords.map(p=>`<circle class="chart-dot" cx="${p[0]}" cy="${p[1]}" r="3"/>`).join('');$('chartLabels').innerHTML=points.length?`<span>${esc(points[0].run_name)}</span><span>${esc(points.at(-1).run_name)}</span>`:'<span>暂无数据</span><span>现在</span>'}
+    function renderSessions(){const rows=sessions.filter(s=>!query||`${s.run_name} ${s.task||''} ${s.model||''}`.toLowerCase().includes(query));if(!rows.length){$('sessionRows').innerHTML='<div class="empty">还没有匹配的实验 Session<br>点击“创建实验”开始第一次运行</div>';return}$('sessionRows').innerHTML=rows.map(s=>{const live=liveStatuses.has(s.status),p=activityFor(s);return `<article class="session-row"><div><div class="session-name">${esc(s.run_name)}</div><div class="session-task">${esc(s.task||s.model||when(s.updated_at||s.started_at))}</div></div><div><span class="status ${esc(s.status)}">${statusLabel(s.status)}</span></div><div><div class="score">${activityLabel(s)} · ${esc(when(s.updated_at||s.started_at))}</div><div class="progress" title="${activityLabel(s)}"><span style="width:${p}%"></span></div></div><div class="row-actions"><a class="mini" href="/session/${encodeURIComponent(s.id)}/">${live?'实时':'查看'}</a>${live?`<button class="mini stop" data-stop="${esc(s.id)}" data-name="${esc(s.run_name)}">停止</button>`:''}</div></article>`}).join('');document.querySelectorAll('[data-stop]').forEach(b=>b.onclick=()=>stopRun(b.dataset.stop,b.dataset.name))}
+    function renderLivePicker(){const live=sessions.filter(s=>liveStatuses.has(s.status));const valid=live.some(s=>s.id===selectedId);if(!valid)selectedId=live[0]?.id||'';$('liveSession').innerHTML=live.length?live.map(s=>`<option value="${esc(s.id)}" ${s.id===selectedId?'selected':''}>${esc(s.run_name)}</option>`).join(''):'<option value="">无运行实验</option>';const enabled=!!selectedId;$('assistantInput').disabled=!enabled;$('sendBtn').disabled=!enabled;$('assistantInput').placeholder=enabled?'输入对当前实验的询问或干预…':'选择运行中实验后输入…';if(enabled&&(!source||source.__session!==selectedId))connectSession();if(!enabled){disconnectSession();renderWelcome()}}
+    function disconnectSession(){if(source){source.close();source=null}latestSnapshot=null}
+    function connectSession(){disconnectSession();if(!selectedId)return;source=new EventSource(`/session/${encodeURIComponent(selectedId)}/events`);source.__session=selectedId;source.onmessage=e=>{try{const msg=JSON.parse(e.data);if(msg.kind==='snapshot'){latestSnapshot=msg.state||{};renderAssistant()}}catch(err){}};source.onerror=()=>{if(source)$('assistantInput').placeholder='正在重连实验流…'}}
+    function renderWelcome(){$('messages').innerHTML=`<div class="bubble-row agent"><div class="bot">${svg('i-bot')}</div><div><div class="bubble">你好，我是 Arbor 实验助手。启动一个交互实验后，可以在这里提问、调整方向或审批实验节点。</div></div></div>`}
+    function renderAssistant(){const snap=latestSnapshot||{},turns=snap.companion?.turns||[];let html=turns.map(t=>{const role=Array.isArray(t)?t[0]:t.role,text=Array.isArray(t)?t[1]:t.text,user=role==='you'||role==='user';return `<div class="bubble-row ${user?'user':'agent'}">${user?'':`<div class="bot">${svg('i-bot')}</div>`}<div><div class="bubble">${esc(text)}</div><div class="bubble-time">${user?'你':'Arbor'} · 实时</div></div></div>`}).join('');if(!html)html=`<div class="bubble-row agent"><div class="bot">${svg('i-bot')}</div><div><div class="bubble">已连接到 <b>${esc(snap.run_name||'当前 Session')}</b>。你可以询问当前进展，或用 Steer 向研究智能体注入新方向。</div></div></div>`;if(snap.gate){const g=snap.gate;html+=`<div class="system-card"><div class="system-title"><span>!</span>实验节点等待审批</div><p>${esc(g.prompt||'请审核当前节点')}</p><div class="approval-actions"><button class="approve" data-gate="approve">批准</button><button data-gate="reject">拒绝</button><button data-gate="skip">跳过</button></div><input class="gate-feedback" id="gateFeedback" placeholder="输入修改意见后回车…" /></div>`}$('messages').innerHTML=html;$('messages').scrollTop=$('messages').scrollHeight;document.querySelectorAll('[data-gate]').forEach(b=>b.onclick=()=>sendGate(b.dataset.gate));const gf=$('gateFeedback');if(gf)gf.onkeydown=e=>{if(e.key==='Enter'&&gf.value.trim()){e.preventDefault();sendGate('edit '+gf.value.trim());gf.value=''}}}
+    async function sendInteraction(){const input=$('assistantInput'),text=input.value.trim();if(!text||!selectedId)return;input.value='';appendPending(text);try{await api(`/session/${encodeURIComponent(selectedId)}/input`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:interactionMode,payload:text})});toast(interactionMode==='steer'?'干预指令已发送':'问题已发送')}catch(e){toast(e.message)}}
+    function appendPending(text){const box=$('messages');box.insertAdjacentHTML('beforeend',`<div class="bubble-row user"><div><div class="bubble">${esc(text)}</div><div class="bubble-time">你 · 刚刚</div></div></div>`);box.scrollTop=box.scrollHeight}
+    async function sendGate(value){if(!selectedId||!latestSnapshot?.gate)return;try{await api(`/session/${encodeURIComponent(selectedId)}/input`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'gate',node_id:latestSnapshot.gate.node_id||'',value})});toast('审批操作已发送')}catch(e){toast(e.message)}}
+    async function stopRun(id,name){if(!confirm(`确定停止实验 ${name}？未保存的当前步骤可能中断。`))return;try{await api(`/api/runs/${encodeURIComponent(id)}/stop`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});toast('停止信号已发送');await loadSessions()}catch(e){toast(e.message)}}
+    function showModal(){$('runModal').classList.remove('hidden');setTimeout(()=>$('prompt').focus(),50)}function hideModal(){$('runModal').classList.add('hidden')}
+    ['newTop','newRail','newMain'].forEach(id=>$(id).onclick=showModal);$('closeModal').onclick=hideModal;$('cancelModal').onclick=hideModal;$('runModal').onclick=e=>{if(e.target===$('runModal'))hideModal()};
+    document.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>$(b.dataset.scroll).scrollIntoView({behavior:'smooth',block:'center'}));
+    $('refreshBtn').onclick=loadSessions;$('liveSession').onchange=e=>{selectedId=e.target.value;connectSession();renderAssistant()};
+    document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{interactionMode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));$('assistantInput').placeholder=interactionMode==='steer'?'输入要注入研究智能体的方向…':'询问当前进展、分数或分支原因…'});
+    $('sendBtn').onclick=sendInteraction;$('assistantInput').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendInteraction()}};
+    $('searchInput').oninput=e=>{query=e.target.value.trim().toLowerCase();renderSessions()};
+    $('docsBtn').onclick=()=>toast('使用右侧面板选择运行中 Session，即可 Ask、Steer 或审批节点。');$('treeBtn').onclick=()=>{const live=sessions.find(s=>liveStatuses.has(s.status));if(live)location.href=`/session/${encodeURIComponent(live.id)}/`;else toast('当前没有运行中的实验树')};$('statusBtn').onclick=()=>toast(`${sessions.filter(s=>liveStatuses.has(s.status)).length} 个实验正在运行`);$('settingsBtn').onclick=()=>toast('当前为免登录开放交互模式');
+    $('runForm').onsubmit=async e=>{e.preventDefault();const btn=$('startBtn'),msg=$('runMessage');btn.disabled=true;msg.className='form-msg';msg.textContent='正在启动…';const payload={project:$('project').value,run_name:$('runName').value,config:$('config').value,interaction_mode:$('mode').value,max_cycles:$('cycles').value,prompt:$('prompt').value,allow_non_base_branch:$('allowBranch').checked};try{const data=await api('/api/runs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});msg.className='form-msg ok';msg.textContent='已启动：'+data.run.run_name;$('runName').value='';$('prompt').value='';toast('实验已启动');setTimeout(hideModal,700);await loadSessions()}catch(err){msg.className='form-msg error';msg.textContent=err.message}finally{btn.disabled=false}};
+    window.addEventListener('beforeunload',disconnectSession);boot();
+  </script>
+</body>
+</html>

@@ -27,6 +27,8 @@ def start_webui(
     scan: int = 1,
     companion: Any | None = None,
     enable_input: bool = False,
+    host: str = "127.0.0.1",
+    token: str | None = None,
 ) -> WebUIServer | None:
     """Start a ``WebUIServer`` and return it, or ``None`` if disabled/no port.
 
@@ -44,8 +46,9 @@ def start_webui(
         return None
     span = max(1, scan) if auto else 1
     for port in range(preferred, preferred + span):
-        server = WebUIServer(run_state, bus, port=port,
-                             companion=companion, enable_input=enable_input)
+        server = WebUIServer(run_state, bus, port=port, host=host,
+                             companion=companion, enable_input=enable_input,
+                             token=token)
         if server.start():
             return server
     log.warning("WebUI could not bind any port in %d..%d", preferred, preferred + span - 1)
@@ -58,6 +61,7 @@ def start_session_webui(
     run_name: str | None = None,
     preferred: int = 8765,
     scan: int = 16,
+    host: str = "127.0.0.1",
 ) -> WebUIServer | None:
     """Start a read-only WebUI backed by an on-disk session directory.
 
@@ -76,7 +80,8 @@ def start_session_webui(
 
     for port in range(preferred, preferred + max(1, scan)):
         # No run_state, no bus: snapshot_fn drives everything; read-only.
-        server = WebUIServer(None, None, port=port, enable_input=False, snapshot_fn=_snapshot)
+        server = WebUIServer(None, None, port=port, host=host,
+                             enable_input=False, snapshot_fn=_snapshot)
         if server.start():
             return server
     log.warning("session WebUI could not bind any port in %d..%d", preferred, preferred + scan - 1)

@@ -80,7 +80,11 @@
  * POST /input carries ask/steer/gate back into the run. This file is a 1:1
  * port of the Arbor Dashboard design (design-ref), driven by that live data.
  */
-const TOKEN = new URLSearchParams(location.search).get("t") || "";
+const PAGE_PATH = location.pathname.replace(/\/$/, "");
+const MANAGED = PAGE_PATH.startsWith("/session/");
+const API_BASE = MANAGED ? PAGE_PATH : "";
+const TOKEN = new URLSearchParams(location.search).get("t") || (MANAGED ? "console" : "");
+let CONSOLE_CSRF = "";
 let INTERACTIVE = false;
 
 function normalizeState(raw){
@@ -308,6 +312,9 @@ function renderShell(){
           </div>
           ${exp?`<div style="font-size:11.5px; color:var(--tx3); margin-top:5px; padding-left:17px;">Active Task</div>`:''}
         </div>
+        ${MANAGED?`<a href="/" title="Back to Console" class="hb" style="display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:11px; background:transparent; border:1px solid var(--line); color:var(--tx2); text-decoration:none; font-size:13.5px; font-weight:500; justify-content:${just};">
+          ${ic('home',17,'flex:none;')}${exp?`<span style="white-space:nowrap;">实验控制台</span>`:''}
+        </a>`:''}
         <a href="https://github.com/RUC-NLPIR/Arbor" target="_blank" rel="noopener" title="View Repository" class="hb" style="display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:11px; background:transparent; border:1px solid var(--line); color:var(--tx2); text-decoration:none; font-size:13.5px; font-weight:500; justify-content:${just};">
           ${ic('github',17,'flex:none;')}${exp?`<span style="white-space:nowrap;">View Repository</span>`:''}
         </a>
@@ -996,7 +1003,8 @@ function nodeModalHTML(n){
 /* ───────────────────────── interactions ───────────────────────── */
 async function postInput(body){
   if(!INTERACTIVE || !TOKEN) return false;
-  try{ const r=await fetch('/input',{ method:'POST', headers:{'Content-Type':'application/json','X-Arbor-Token':TOKEN}, body:JSON.stringify(body) }); return r.ok; }
+  try{ const headers={'Content-Type':'application/json','X-Arbor-Token':TOKEN}; if(MANAGED) headers['X-Arbor-CSRF']=CONSOLE_CSRF;
+    const r=await fetch(API_BASE+'/input',{ method:'POST', headers, body:JSON.stringify(body) }); return r.ok; }
   catch(e){ return false; }
 }
 function setScreen(k){ if(ST.screen===k) return; ST.screen=k; ST.hoverNode=null; ST.hoverImpr=null; ST.hoverBranch=null; ST.hoverFilter=null; renderShell(); }
@@ -1108,17 +1116,23 @@ function onEvent(type, d){
     if(ST.live && ST.screen==='home') updateActivityFeed(); }   // surgical: only the feed, no full rebuild
 }
 function connect(){
-  const es=new EventSource('/events');
+  const es=new EventSource(API_BASE+'/events');
   es.onmessage=(e)=>{ let f; try{ f=JSON.parse(e.data); }catch{ return; }
     if(f.kind==='snapshot') onSnapshot(f.state);
     else if(f.kind==='event') onEvent(f.type, f.data); };
   es.onerror=()=>{ CONNECTED=false; updateTopbar(); };
 }
 
+async function loadConsoleSession(){
+  if(!MANAGED) return;
+  try{ const r=await fetch('/api/me',{credentials:'same-origin'}); if(!r.ok){ location.href='/'; return; } const d=await r.json(); CONSOLE_CSRF=d.csrf_token||''; }
+  catch(e){ CONSOLE_CSRF=''; }
+}
+
 /* ───────────────────────── boot ───────────────────────── */
 applyTheme();
 renderShell();
-connect();
+loadConsoleSession().finally(connect);
 </script>
 </body>
 </html>

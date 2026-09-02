@@ -100,7 +100,7 @@ packages = [
 [tool.setuptools.package-data]
 "arbor" = ["skills/*.md", "py.typed"]
 "arbor.cli" = ["assets/demo_session/*", "assets/*.html"]
-"arbor.webui" = ["index.html"]
+"arbor.webui" = ["index.html", "console.html"]
 "arbor.plugins" = ["*.yaml", "*.yml"]
 # Ship every file in the skill suite verbatim (SKILL.md, agents/*.yaml,
 # references/*.md, scripts/*.py, …) so the installed copy is complete.

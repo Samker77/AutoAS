@@ -257,6 +257,9 @@ class UIConfig(BaseModel):
     review_timeout: int = 1_800
     # Independent monitoring port for the read-only WebUI (#7). None = off.
     webui_port: int | None = None
+    # Bind address for a directly launched WebUI. Loopback is the safe default;
+    # remote users should normally use the authenticated control console.
+    webui_host: str = "127.0.0.1"
     # Whether mid-run quick commands / questions over stdin are accepted (#11).
     quick_commands_enabled: bool = True
     # Whether the agent may ask the user for missing info (#10). When False
@@ -385,4 +388,3 @@ def redacted_snapshot(model: BaseModel) -> dict[str, Any]:
     excluded by ``model_dump``.
     """
     return _redact(model.model_dump(mode="json", exclude_none=False))
-

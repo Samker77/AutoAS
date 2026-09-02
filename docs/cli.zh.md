@@ -13,6 +13,7 @@ Arbor 安装 `arbor` 命令（外加几个更底层的入口点）。本页是�
 | `arbor doctor` | 诊断你的环境（PATH、Python、git、API key）。 |
 | `arbor report` | 处理一次已完成运行的报告。 |
 | `arbor idea-check` | 针对单个想法对照 alphaXiv 公共 API 做新颖性 / 先行工作审查。 |
+| `arbor serve` | 启动免登录的远程实验与 Session 控制台。 |
 | `arbor version` | 打印已安装的版本。 |
 
 !!! tip
@@ -55,6 +56,7 @@ data"`）。省略它则从接入对话开始。
 | `--followup / --no-followup` | 在 `REPORT.md` 之后，打开一个关于已完成运行的只读问答提示（默认开）。 |
 | `--verbose-preflight` | 连成功的预检项也打印（默认只显示失败/警告）。 |
 | `--webui-port N` | 只读浏览器监控端口。交互式运行默认在 `8765` 附近自动启动。 |
+| `--webui-host HOST` | 单次运行 WebUI 的监听地址（默认 `127.0.0.1`）；远程访问优先使用 `arbor serve`。 |
 | `--no-webui` | 不启动只读浏览器监控。 |
 | `--interaction-mode, --mode MODE` | 人在回路模式：`auto`、`direction`、`review`、`collaborative`。 |
 | `--allow-non-base-branch` | 允许从当前非 `main` 分支启动。开发时有用，做基准时有风险。 |
@@ -79,6 +81,26 @@ arbor run --mode review
 # 续跑一次被中断的会话
 arbor run --resume --run-name my-study
 ```
+
+## `arbor serve`
+
+```bash
+arbor serve [OPTIONS]
+```
+
+启动免登录的远程控制台，可创建/停止实验、选择历史 Session，并将 Ask、Steer 和 review 审批
+转发给实时实验。主要选项：
+
+| 选项 | 说明 |
+| --- | --- |
+| `--workspace-root PATH` | 只允许管理该目录内的项目和 Session。 |
+| `--host HOST` | 监听地址；远程访问使用 `0.0.0.0`。 |
+| `--port N` | 控制台端口（默认 `8765`）。 |
+| `--session-ttl SECONDS` | 匿名浏览器会话有效期（默认 8 小时）。 |
+| `--secure-cookie` | 仅通过 HTTPS 发送浏览器会话 Cookie；应与 HTTPS 反向代理配合使用。 |
+| `--no-open` | 不自动打开本机浏览器。 |
+
+任何知道网址的人都能控制实验，公网部署应在反向代理、防火墙、VPN 或隧道层限制访问。详见[Web UI 与监控](web-ui.zh.md#免登录的远程实验控制台)。
 
 ## 交互式斜杠命令 { #interactive-slash-commands }
 

@@ -25,7 +25,7 @@ INDEX = INDEX_PATH.read_text(encoding="utf-8")
 
 
 def test_page_wires_the_sse_and_input_contract() -> None:
-    assert "EventSource('/events')" in INDEX          # live snapshot stream
+    assert "EventSource(API_BASE+'/events')" in INDEX  # direct or console-proxied stream
     assert "/input" in INDEX and "X-Arbor-Token" in INDEX  # token-gated control channel
     assert "'snapshot'" in INDEX and "'event'" in INDEX     # frame kinds it branches on
 
@@ -91,6 +91,6 @@ def test_index_is_served_with_hardening_headers(tmp_path: Path) -> None:
             assert "text/html" in resp.headers.get("Content-Type", "")
         # Served body is the real page, with its live wiring intact.
         assert "<title>Arbor</title>" in body
-        assert "EventSource('/events')" in body
+        assert "EventSource(API_BASE+'/events')" in body
     finally:
         server.stop()

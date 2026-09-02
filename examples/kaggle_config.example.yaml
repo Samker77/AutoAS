@@ -34,3 +34,4 @@ llm:
 ui:
   interaction_mode: auto   # auto | direction | review | collaborative
   # webui_port: 8765        # expose the read-only browser monitor
+  # webui_host: 127.0.0.1   # keep loopback; use `arbor serve` for authenticated remote access

@@ -66,3 +66,43 @@ run with `--no-dashboard-input` (or simply use `--no-webui`).
 
 Both views are optional conveniences layered on top of the same durable artifacts — the
 Idea Tree, checkpoints, and `REPORT.md`. See [Outputs & Resume](outputs-and-resume.md).
+
+## No-login remote experiment console
+
+`arbor serve` puts a control plane in front of the existing WebUI. It opens directly without
+an account/password prompt and can:
+
+- create and stop experiments inside a configured workspace root;
+- select both live and historical Sessions;
+- use **Ask**, **Steer**, and review-node approval/edit controls on live runs; and
+- inspect completed Sessions as durable read-only views.
+
+```bash
+arbor serve \
+  --workspace-root /srv/arbor-workspace \
+  --host 127.0.0.1 \
+  --port 8765 \
+  --no-open
+```
+
+The recommended remote path is an SSH tunnel:
+
+```bash
+ssh -L 8765:127.0.0.1:8765 user@server
+```
+
+Then open `http://127.0.0.1:8765` locally. The console launches each child run with its existing
+interactive WebUI on an ephemeral **loopback-only** port, then proxies its SSE and input
+channels through the same-origin Session route. Provider API keys remain in
+the child environment and are never returned to the browser or written to the console's
+control metadata.
+
+The browser automatically receives an HMAC-signed, HttpOnly, SameSite=Strict session cookie
+and a CSRF token; the session expires after eight hours by default. If you bind to `0.0.0.0`,
+put the console behind an HTTPS reverse proxy and add `--secure-cookie`. Anyone who knows the
+URL can control experiments, so a public deployment should restrict access at the proxy,
+firewall, VPN, or tunnel layer.
+Only expose the console port in the server firewall; do not expose child WebUI ports.
+
+Stopping the console itself does not stop active experiments. Use the **Stop** action in the
+web page when you intend to terminate a run.

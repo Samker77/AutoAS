@@ -60,3 +60,44 @@ arbor --no-webui             # 完全不要浏览器监控
 
 两个视图都是叠加在同一批持久产物之上的可选便利——想法树、检查点与 `REPORT.md`。见
 [输出与续跑](outputs-and-resume.md)。
+
+## 免登录的远程实验控制台
+
+`arbor serve` 在现有 WebUI 前增加一个打开即用的控制层，无需账号密码，可以：
+
+- 在限定的工作区内创建和停止实验；
+- 选择运行中或历史 Session；
+- 在实时 Session 中使用 **Ask**、**Steer** 和实验节点批准/编辑；
+- 以只读方式查看已完成 Session 的持久化结果。
+
+```bash
+arbor serve \
+  --workspace-root /srv/arbor-workspace \
+  --host 127.0.0.1 \
+  --port 8765 \
+  --no-open
+```
+
+推荐通过 SSH 隧道远程访问：
+
+```bash
+ssh -L 8765:127.0.0.1:8765 user@server
+```
+
+随后在本机打开 `http://127.0.0.1:8765`。控制台启动实验时，会让每个子实验继续使用原有交互式
+WebUI，但只监听一个随机的**本机回环端口**；SSE 实时流和输入请求经同源 Session 路由转发。
+模型服务 API Key 只保留在子进程环境中，不返回浏览器，也不写入控制台元数据。
+
+浏览器首次打开时会自动获得 HMAC 签名、HttpOnly、SameSite=Strict 的会话 Cookie 和 CSRF token，
+默认 8 小时过期。如需监听 `0.0.0.0`，必须配置 HTTPS 反向代理并增加 `--secure-cookie`。
+任何知道网址的人都能控制实验，公网部署应在代理、防火墙、VPN 或隧道层限制访问。不要开放子实验 WebUI 端口。
+
+停止控制台进程不会停止正在运行的实验；确实需要终止实验时，请使用网页中的“停止”按钮。
+
+### 部署到 Render
+
+仓库根目录已提供 `render.yaml`。在 Render 中选择 **New → Blueprint**，连接本仓库并选择包含该文件的分支，即可创建公开的 Web Service。服务会自动监听 Render 提供的端口，并通过 `/healthz` 接受健康检查。
+
+首次部署时需要在 Render 的环境变量页面填写 `OPENAI_API_KEY`；使用 OpenAI 兼容网关时，同时填写 `OPENAI_BASE_URL`。不要把密钥直接提交到仓库。
+
+默认 Blueprint 使用免费实例，适合界面预览和短时交互。免费实例闲置后会休眠，并且文件系统是临时的；服务重启或重新部署后，运行过程中产生的 Session 和报告会丢失。若要持续运行实验，请升级为付费实例并把工作目录放在 Render Persistent Disk 的挂载路径下。Render 本身不提供 GPU，因此 GPU 训练任务仍应运行在 GPU 服务器上。

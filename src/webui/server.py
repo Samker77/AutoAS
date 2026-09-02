@@ -76,14 +76,16 @@ class WebUIServer:
     browser can ask the read-only companion, steer the research agent, and
     answer review gates — the same actions the terminal dashboard offers. That
     channel is gated by a per-run random token (carried in the URL the user
-    opens) so a stray local page can't drive the run via CSRF; the socket itself
-    only ever binds ``127.0.0.1``.
+    opens) so a stray page can't drive the run via CSRF.  Direct WebUI launches
+    default to ``127.0.0.1``; the authenticated control console keeps child
+    WebUIs local and proxies them through its account-protected origin.
     """
 
     def __init__(self, run_state: Any, bus: Any, *, port: int,
                  host: str = "127.0.0.1", companion: Any | None = None,
                  enable_input: bool = True,
-                 snapshot_fn: "Callable[[], dict[str, Any]] | None" = None) -> None:
+                 snapshot_fn: "Callable[[], dict[str, Any]] | None" = None,
+                 token: str | None = None) -> None:
         self.run_state = run_state
         self.bus = bus
         self.port = port
@@ -96,7 +98,7 @@ class WebUIServer:
         # Interactive iff the caller wants input AND we have the wiring for it
         # (never in file-backed mode — there is no run to steer).
         self.interactive = bool(enable_input) and snapshot_fn is None
-        self.token = secrets.token_urlsafe(16)
+        self.token = token or secrets.token_urlsafe(16)
         self.broadcast = _Broadcast()
         self._httpd: ThreadingHTTPServer | None = None
         self._stop = threading.Event()

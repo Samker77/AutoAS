@@ -265,7 +265,7 @@ arbor run --max-cycles 20 --mode review --no-webui
 ```
 
 Common ones: `--max-cycles N`, `--max-turns N`, `--mode MODE`, `--webui-port N`,
-`--no-webui`. See the [CLI reference](cli.md#arbor-run) for the full list.
+`--webui-host HOST`, `--no-webui`. See the [CLI reference](cli.md#arbor-run) for the full list.
 
 ### 5. In the chat: pick a plugin or skill for this run
 
@@ -314,6 +314,7 @@ The `ui:` group controls oversight and the live monitor:
 | --- | --- |
 | `interaction_mode` | `auto`, `direction`, `review`, or `collaborative`. See [Interaction Modes](interaction-modes.md). Override with `--mode`. |
 | `webui_port` | Port for the browser monitor (default `8765`). See [Web UI & Monitoring](web-ui.md). Override with `--webui-port`; disable with `--no-webui`. |
+| `webui_host` | Bind address for a directly launched per-run WebUI (default `127.0.0.1`). Prefer the authenticated `arbor serve` console for remote access. |
 
 ### Domain targeting
 

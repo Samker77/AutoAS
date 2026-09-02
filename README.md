@@ -175,7 +175,22 @@ executor:
 | `arbor report <session>` | 重新渲染某次会话的 REPORT |
 | `arbor idea-check "<想法>"` | 对照 alphaXiv 做新颖性 / 先行工作审查 |
 | `arbor web <session>` | 打开只读浏览器监控 |
+| `arbor serve` | 启动免登录的远程实验控制台 |
 | `arbor --resume --run-name <name>` | 断点恢复一次运行 |
+
+### 远程交互控制台
+
+基于现有 Arbor WebUI，打开首页即可创建/停止实验、切换历史 Session，并在实时
+Session 中使用 Ask、Steer 和实验节点审批。单次实验端口仍只绑定到服务器本机，由控制台转发：
+
+```bash
+arbor serve --workspace-root /path/to/workspace --host 127.0.0.1 --port 8765 --no-open
+```
+
+推荐用 SSH 端口转发后访问本机 `http://127.0.0.1:8765`。如需公开监听，使用
+`--host 0.0.0.0`，但必须在前面配置 HTTPS 反向代理并加 `--secure-cookie`。免登录模式下，
+任何拿到网址的人都可以控制实验，公网部署应在反向代理层限制访问来源。防火墙只开放控制台端口，
+不要开放各实验的内部 WebUI 端口。详见 [Web UI 与监控](docs/web-ui.zh.md)。
 
 ---
 
@@ -191,7 +206,7 @@ src/                 # `arbor` 包
 ├── cli/             arbor CLI：intake、实时仪表盘、setup、doctor、config
 ├── events/          类型化事件总线与载荷
 ├── report/          报告生成
-├── webui/           只读运行监控 Web 服务器
+├── webui/           运行监控 + 免登录的远程实验控制台
 ├── plugins/         领域插件（mle_kaggle 等）
 └── skills/          按需加载的 Markdown 手册
 result/              实验结果（V2 vs V1 对照，含完整 APTOS 记录）

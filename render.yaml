@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: arbor-scientist-console
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install .
+    startCommand: arbor serve --workspace-root . --host 0.0.0.0 --port $PORT --secure-cookie --no-open
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+

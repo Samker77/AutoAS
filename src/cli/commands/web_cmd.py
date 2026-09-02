@@ -27,6 +27,7 @@ def web_command(
         None, "--cwd", help="Project directory holding .arbor/sessions/ (default: current directory)."
     ),
     port: int = typer.Option(8765, "--port", help="Preferred port (rolls forward if busy)."),
+    host: str = typer.Option("127.0.0.1", "--host", help="Bind address (default: localhost)."),
     open_browser: bool = typer.Option(True, "--open/--no-open", help="Open the URL in a browser."),
 ) -> None:
     """Serve a read-only web monitor for an Arbor session and block until Ctrl-C."""
@@ -37,7 +38,8 @@ def web_command(
         typer.secho(f"error: {exc}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from exc
 
-    server = start_session_webui(session_dir, run_name=session_dir.name, preferred=port)
+    server = start_session_webui(session_dir, run_name=session_dir.name,
+                                 preferred=port, host=host)
     if server is None:
         typer.secho("error: could not bind a port for the WebUI.", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1)
